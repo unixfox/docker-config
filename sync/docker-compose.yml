@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+    syncthing:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            mode: global
+            placement:
+                constraints:
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        environment:
+            - PUID=0
+            - PGID=0
+        image: syncthing/syncthing
+        ports:
+            -
+                mode: host
+                protocol: tcp
+                published: 8384
+                target: 8384
+            -
+                mode: host
+                protocol: udp
+                published: 21027
+                target: 21027
+            -
+                mode: host
+                protocol: tcp
+                published: 22000
+                target: 22000
+        volumes:
+            - '/opt/syncthing:/var/syncthing/config'
+            - '/data:/data'

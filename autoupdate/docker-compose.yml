@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+    ouroboros:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - 'node.role == manager'
+            restart_policy:
+                condition: any
+        environment:
+            - CLEANUP=true
+            - INTERVAL=600
+            - SELF_UPDATE=true
+            - TZ=Europe/Brussels
+            - SWARM=true
+            - LOG_LEVEL=debug
+        image: pyouroboros/ouroboros
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'

@@ -1,0 +1,111 @@
+[
+    {
+        "name": "Search request",
+        "filters": [
+            "Param:q",
+            "Path=^(/|/search)$"
+        ],
+        "interval": 5,
+        "limit": 1,
+        "subrules": [
+            {
+                "name": "block missing accept-language",
+                "filters": [
+                    "!Header:Accept-Language",
+                    "!Header:Accept-Encoding"
+                ],
+                "actions": [
+                    {
+                        "name": "block"
+                    }
+                ]
+            },
+            {
+                "name": "Robo-agent limit",
+                "limit": 0,
+                "filters": [
+                    "Header:User-Agent=(curl|cURL|Wget|python-requests|Scrapy|FeedFetcher|Go-http-client|UniversalFeedParser.+|Mozilla\/5.0 \\(Windows NT 6\\.1\\; WOW64\\; rv\\:64.0\\) Gecko\/20100101 Firefox\/64\\.0)|Mozilla\/5\\.0 \\(Windows NT 10\\.0\\; Win64\\; x64\\) AppleWebKit\\/537\\.36 \\(KHTML\\, like Gecko\\) Chrome/74.0\\.3729\\.131 Safari\/537\\.36|Mozilla\/5\\.0 \\(X11\\; Ubuntu\\; Linux x86_64\\; rv\\:65\\.0\\) Gecko\/20100101 Firefox\/65\\.0"
+                ],
+                "actions": [
+                    {
+                        "name": "block",
+                        "params": {
+                            "message": "Automation is not allowed sorry."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Bot limit",
+                "limit": 0,
+                "stop": true,
+                "filters": [
+                    "Header:User-Agent=(Googlebot|bingbot|Baiduspider|yacybot|YandexMobileBot|YandexBot|Yahoo! Slurp|MJ11bot|AhrefsBot|archive.org_bot|msnbot|MJ11bot|SeznamBot|linkdexbot|Netvibes|SMTBot|zgrab|James BOT)"
+                ],
+                "actions": [
+                    {
+                        "name": "block",
+                        "params": {
+                            "message": "Don't archive that content."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "RSS/JSON limit",
+                "limit": 0,
+                "stop": true,
+                "filters": [
+                    "Param:format=(csv|json|rss)"
+                ],
+                "actions": [
+                    {
+                        "name": "block",
+                        "params": {
+                            "message": "Sorry CSV/RSS/JSON is not allowed due to bot abuse."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "IP limit",
+                "interval": 10,
+                "limit": 2,
+                "stop": true,
+                "aggregations": [
+                    "Header:X-Forwarded-For"
+                ],
+                "actions": [
+                    {
+                        "name": "log"
+                    },
+                    {
+                        "name": "block",
+                        "params": {
+                            "message": "You are browsing too fast. Please refresh the page with F5."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "User-agent limit",
+                "interval": 10,
+                "limit": 3,
+                "aggregations": [
+                    "Header:User-Agent"
+                ],
+                "actions": [
+                    {
+                        "name": "log"
+                    },
+                    {
+                        "name": "block",
+                        "params": {
+                            "message": "You are browsing too fast. Please refresh the page with F5."
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

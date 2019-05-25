@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+    netdata:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+        image: titpetric/netdata
+        network_mode: host
+        privileged: true
+        volumes:
+            - '/proc:/host/proc:ro'
+            - '/sys:/host/sys:ro'

@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+    mariadb:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.labels.cloud==aws
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        environment:
+            MYSQL_DATABASE: unixfox
+        image: yobasystems/alpine-mariadb
+        networks:
+            - global
+        ports:
+            -
+                mode: host
+                protocol: tcp
+                published: 3306
+                target: 3306
+        volumes:
+            - '/data/mariadb:/var/lib/mysql'
+networks:
+    global:
+        external: true

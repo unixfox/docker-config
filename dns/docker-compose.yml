@@ -1,0 +1,106 @@
+version: '3.7'
+services:
+    powerdns:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+                - caddy.address=api.dns.unixfox.eu
+                - caddy.targetport=8081
+                - caddy.proxy.transparent
+                - 'caddy.log=/ /var/log/powerdnsapi.log {combined}'
+            placement:
+                constraints:
+                    - node.labels.cloud==aws
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        entrypoint: /env_secrets_expand.sh
+        environment:
+            - MYSQL_HOST=mariadb
+            - MYSQL_USER=powerdns
+            - MYSQL_PASS=DOCKER-SECRET->pdadbpassword
+            - MYSQL_DB=powerdns
+            - PDNS_API_KEY=DOCKER-SECRET->pdaapikey
+            - ENTRYPOINT=/entrypoint.sh
+        hostname: powerdns
+        image: psitrax/powerdns
+        networks:
+            - global
+        ports:
+            -
+                mode: host
+                protocol: udp
+                published: 53
+                target: 53
+            -
+                mode: host
+                protocol: tcp
+                published: 53
+                target: 53
+        secrets:
+            - pdadbpassword
+            - pdaapikey
+        volumes:
+            - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
+            - '/data/powerdns:/etc/pdns/conf.d:ro'
+    powerdns-admin:
+        deploy:
+            labels:
+                - caddy.address=dns.unixfox.eu
+                - caddy.targetport=9191
+                - caddy.proxy.transparent
+                - 'caddy.log=/ /var/log/powerdnsadmin.log {combined}'
+                - caddy.gzip
+                - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data: fonts.googleapis.com fonts.gstatic.com; script-src ''self'' ''unsafe-inline''; img-src * data:; object-src ''none''; style-src ''self'' fonts.googleapis.com ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
+                - 'caddy.proxy.header_downstream_1=X-Content-Type-Options nosniff'
+                - 'caddy.proxy.header_downstream_2=X-Frame-Options DENY'
+                - 'caddy.proxy.header_downstream_3=X-XSS-Protection "1; mode=block"'
+                - 'caddy.proxy.header_downstream_4=referrer-policy "no-referrer, strict-origin-when-cross-origin"'
+                - 'caddy.proxy.header_downstream_5=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
+                - caddy.filter_0=rule
+                - caddy.filter_0.path=/
+                - 'caddy.filter_0.search_pattern=type="text/javascript"'
+                - caddy.filter_0.replacement=@/root/.caddy/nounce.html
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.labels.cloud==aws
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        entrypoint: /env_secrets_expand.sh
+        environment:
+            - ENVIRONMENT=production
+            - PDA_DB_HOST=mariadb
+            - PDA_DB_NAME=powerdnsadmin
+            - PDA_DB_USER=powerdns
+            - PDA_DB_PASSWORD=DOCKER-SECRET->pdadbpassword
+            - PDA_DB_PORT=3306
+            - PDNS_HOST=powerdns
+            - PDNS_API_KEY=DOCKER-SECRET->pdaapikey
+            - FLASK_APP=/powerdns-admin/app/__init__.py
+            - ENTRYPOINT=/entrypoint.sh
+        image: quay.io/unixfox/powerdns-admin
+        networks:
+            - global
+        secrets:
+            - pdadbpassword
+            - pdaapikey
+        volumes:
+            - '/data/powerdnsadmin/config.py:/powerdns-admin/config.py'
+            - 'powerdns-admin-assets:/powerdns-admin/app/static'
+            - 'powerdns-admin-assets2:/powerdns-admin/node_modules'
+            - 'powerdns-admin-assets3:/powerdns-admin/logs'
+            - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
+networks:
+    global:
+        external: true
+secrets:
+    pdaapikey:
+        external: true
+    pdadbpassword:
+        external: true
+volumes:
+    powerdns-admin-assets: null
+    powerdns-admin-assets2: null
+    powerdns-admin-assets3: null
