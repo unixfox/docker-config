@@ -60,7 +60,7 @@ services:
             - MAX_RETRY=4
             - JAIL_PATH=/jail
             - ENDPOINT_NAME=searx.css
-            - TIMEOUT_LOAD=10000
+            - TIMEOUT_LOAD=60000
             - 'WHITELIST=5.9.58.49,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130'
         image: unixfox/antibot-proxy
         networks:
@@ -74,6 +74,7 @@ services:
             mode: global
             placement:
                 constraints:
+                    - node.labels.cloud==aws
                     - node.labels.os==linux
             restart_policy:
                 condition: any
@@ -90,6 +91,8 @@ services:
             - '/etc/localtime:/etc/localtime:ro'
             - '/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro'
             - '/data/searx/engines/google_images.py:/usr/local/searx/searx/engines/google_images.py:ro'
+            - '/data/searx/webapp.py:/usr/local/searx/searx/webapp.py:ro'
+            - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
 networks:
     global:
         external: true
