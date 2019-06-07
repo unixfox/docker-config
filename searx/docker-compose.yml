@@ -57,16 +57,17 @@ services:
                 condition: any
         environment:
             - 'TARGET=http://searx:8888'
-            - MAX_RETRY=4
+            - MAX_RETRY=1
             - JAIL_PATH=/jail
             - ENDPOINT_NAME=searx.css
-            - TIMEOUT_LOAD=60000
+            - TIMEOUT_LOAD=120000
             - 'WHITELIST=5.9.58.49,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130'
         image: unixfox/antibot-proxy
         networks:
             - global
         volumes:
             - '/data/caddy/searx/jail:/jail'
+            - '/etc/localtime:/etc/localtime:ro'
     searx:
         deploy:
             labels:
@@ -74,7 +75,6 @@ services:
             mode: global
             placement:
                 constraints:
-                    - node.labels.cloud==aws
                     - node.labels.os==linux
             restart_policy:
                 condition: any

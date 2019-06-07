@@ -13,3 +13,4 @@ services:
         volumes:
             - '/var/log:/var/log:ro'
             - '/data/fail2ban:/data'
+            - '/etc/localtime:/etc/localtime:ro'

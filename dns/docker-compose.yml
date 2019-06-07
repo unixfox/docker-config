@@ -92,6 +92,7 @@ services:
             - 'powerdns-admin-assets2:/powerdns-admin/node_modules'
             - 'powerdns-admin-assets3:/powerdns-admin/logs'
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
+            - '/etc/localtime:/etc/localtime:ro'
 networks:
     global:
         external: true

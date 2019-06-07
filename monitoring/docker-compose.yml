@@ -12,3 +12,4 @@ services:
         volumes:
             - '/proc:/host/proc:ro'
             - '/sys:/host/sys:ro'
+            - '/etc/localtime:/etc/localtime:ro'
