@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+    sync:
+        deploy:
+            labels:
+                - 'caddy.address=fsync.unixfox.eu'
+                - caddy.targetport=5000
+                - caddy.proxy.transparent
+                - 'caddy.log=/ /var/log/fsync.log "{combined} - {latency}"'
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.labels.cloud==aws
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        environment:
+            - SYNCSERVER_PUBLIC_URL=http://fsync.unixfox.eu
+            - SYNCSERVER_SECRET=DOCKER-SECRET->fsyncsecret
+            - SYNCSERVER_SQLURI=sqlite:////data/syncserver.db
+            - SYNCSERVER_BATCH_UPLOAD_ENABLED=true
+            - SYNCSERVER_FORCE_WSGI_ENVIRON=false
+            - SYNCSERVER_ALLOW_NEW_USERS=true
+            - PORT=5000
+        image: mozilla/syncserver
+        networks:
+            - global
+        volumes:
+            - '/data/firefoxsync:/data'
+            - '/etc/localtime:/etc/localtime:ro'
+networks:
+    global:
+        external: true

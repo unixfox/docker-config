@@ -43,6 +43,7 @@ services:
         volumes:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
             - '/data/powerdns:/etc/pdns/conf.d:ro'
+            - '/etc/localtime:/etc/localtime:ro'
     powerdns-admin:
         deploy:
             labels:

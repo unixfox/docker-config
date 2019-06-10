@@ -46,8 +46,9 @@ services:
                 - 'caddy.expires.match=static/* 1w'
                 - caddy.errors.403=/root/.caddy/errorspage/HTTP403.html
                 - caddy.rewrite_1=/
-                - 'caddy.rewrite_1.if={remote} is "5.9.58.49"'
+                - 'caddy.rewrite_1.if={remote} is "2a01:4f8:161:542e::2"'
                 - caddy.rewrite_1.to=/about
+                - 'caddy.on=startup /updateipv6'
                 - com.ouroboros.enable=true
             placement:
                 constraints:
@@ -61,7 +62,7 @@ services:
             - JAIL_PATH=/jail
             - ENDPOINT_NAME=searx.css
             - TIMEOUT_LOAD=120000
-            - 'WHITELIST=5.9.58.49,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130'
+            - 'WHITELIST=2a01:4f8:161:542e::2,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130,2a01:4f8:161:542e::2'
         image: unixfox/antibot-proxy
         networks:
             - global
@@ -84,6 +85,7 @@ services:
             - PUID=0
         image: woahbase/alpine-searx
         networks:
+            - bridge
             - global
         volumes:
             - '/data/searx/settings.yml:/data/settings.yml:ro'
@@ -95,4 +97,6 @@ services:
             - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
 networks:
     global:
+        external: true
+    bridge:
         external: true

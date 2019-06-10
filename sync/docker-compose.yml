@@ -33,3 +33,4 @@ services:
         volumes:
             - '/opt/syncthing:/var/syncthing/config'
             - '/data:/data'
+            - '/etc/localtime:/etc/localtime:ro'

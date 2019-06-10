@@ -14,15 +14,13 @@ services:
             MYSQL_DATABASE: unixfox
         image: yobasystems/alpine-mariadb
         networks:
+            - bridge
             - global
-        ports:
-            -
-                mode: host
-                protocol: tcp
-                published: 3306
-                target: 3306
         volumes:
             - '/data/mariadb:/var/lib/mysql'
+            - '/etc/localtime:/etc/localtime:ro'
 networks:
     global:
+        external: true
+    bridge:
         external: true

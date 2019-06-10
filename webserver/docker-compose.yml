@@ -14,9 +14,10 @@ services:
                     memory: 200M
             restart_policy:
                 condition: any
-        image: 'unixfox/caddy-docker-proxy:ci'
+        image: 'unixfox/caddy-docker-proxy:ci-alpine'
         networks:
             - global
+            - bridge
         ports:
             -
                 mode: host
@@ -37,6 +38,8 @@ services:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '/data/caddy:/root/.caddy'
             - '/var/log/caddy:/var/log'
+            - '/etc/localtime:/etc/localtime:ro'
+            - '/data/caddy/updateipv6:/updateipv6:ro'
     php:
         deploy:
             labels:
@@ -47,9 +50,13 @@ services:
                     - node.labels.os==linux
             restart_policy:
                 condition: any
+        volumes:
+            - '/etc/localtime:/etc/localtime:ro'
         image: 'php:fpm-alpine'
         networks:
             - global
 networks:
     global:
+        external: true
+    bridge:
         external: true
