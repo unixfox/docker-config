@@ -8,6 +8,7 @@ services:
                 - caddy.proxy.transparent
                 - 'caddy.log_0=/ /var/log/searx.log "{combined} - {latency}"'
                 - 'caddy.log_1=/ /var/log/searx_fail2ban.log "{when_unix} {remote} {status}"'
+                - 'caddy.errors=/var/log/searx_errors.log'
                 - 'caddy.status=403 /deny'
                 - caddy.proxy.header_downstream=-server
                 - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data:; script-src ''self'' ''nonce-upaek0pieKu'' stats.unixfox.eu; img-src * data:; object-src ''none''; style-src ''self'' ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
@@ -62,7 +63,7 @@ services:
             - JAIL_PATH=/jail
             - ENDPOINT_NAME=searx.css
             - TIMEOUT_LOAD=120000
-            - 'WHITELIST=2a01:4f8:161:542e::2,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130,2a01:4f8:161:542e::2'
+            - 'WHITELIST=2a01:4f8:161:542e::2,172.18.0.1,35.238.202.250,64.41.200.101,35.239.110.147,66.249.69.103,63.245.210.130,138.68.46.186,63.245.208.130,2a01:4f8:161:542e::2,35.202.19.185,64.41.200.106,2620:101:8032:74::1:14,35.239.11.105,2604:a880:2:d0::2060:6001,2600:c02:1020:4202::ac10:8269,64.41.200.107,2600:c02:1020:4202::ac10:826c,64.41.200.108'
         image: unixfox/antibot-proxy
         networks:
             - global
