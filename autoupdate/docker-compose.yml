@@ -20,3 +20,16 @@ services:
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '/etc/localtime:/etc/localtime:ro'
+    prune:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            mode: global
+            restart_policy:
+                condition: any
+                delay: 86400s
+                max_attempts: 3650
+        image: softonic/docker-system-prune
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'
+            - '/etc/localtime:/etc/localtime:ro'

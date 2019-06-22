@@ -52,7 +52,7 @@ services:
                 condition: any
         volumes:
             - '/etc/localtime:/etc/localtime:ro'
-        image: 'php:fpm-alpine'
+        image: 'php:fpm'
         networks:
             - global
 networks:
