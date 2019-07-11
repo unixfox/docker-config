@@ -29,10 +29,6 @@ services:
                 - caddy.filter_2.path=/
                 - caddy.filter_2.search_pattern=<head>
                 - caddy.filter_2.replacement=@/root/.caddy/searx/opengraph.html
-                - caddy.filter_3=rule
-                - caddy.filter_3.path=/
-                - caddy.filter_3.search_pattern=<head>
-                - caddy.filter_3.replacement=@/root/.caddy/searx/fake.html
                 - caddy.ipfilter=/
                 - caddy.ipfilter.rule=block
                 - caddy.ipfilter.prefix_dir=/root/.caddy/searx/jail
@@ -59,19 +55,14 @@ services:
                     - node.labels.os==linux
             restart_policy:
                 condition: any
-        environment:
-            - 'TARGET=searx:8888'
-            - 'MAX_RETRY=1'
-            - 'JAIL_PATH=/jail'
-            - 'ENDPOINT_NAME=searx.css'
-            - 'TIMEOUT_LOAD=120000'
-            - 'WHITELIST=2a01:4f8:161:542e::2, 5.9.58.49'
         image: unixfox/antibot-proxy
         networks:
             - global
         volumes:
             - '/data/caddy/searx/jail:/jail'
             - '/etc/localtime:/etc/localtime:ro'
+            - '/data/searx/bot.pug:/app/views/bot.pug:ro'
+            - '/data/searx/config.toml:/app/config.toml:ro'
     searx:
         deploy:
             labels:
