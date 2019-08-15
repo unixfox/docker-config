@@ -11,7 +11,7 @@ services:
                 - 'caddy.errors=/var/log/searx_errors.log'
                 - 'caddy.status=403 /deny'
                 - caddy.proxy.header_downstream=-server
-                - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data:; script-src ''self'' ''nonce-upaek0pieKu'' analyses.searx.be; img-src * data:; object-src ''none''; style-src ''self'' ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
+                - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data:; script-src ''self'' ''nonce-upaek0pieKu'' privacystats.searx.be; img-src * data:; object-src ''none''; style-src ''self'' ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
                 - 'caddy.proxy.header_downstream_1=X-Content-Type-Options nosniff'
                 - 'caddy.proxy.header_downstream_2=X-Frame-Options DENY'
                 - 'caddy.proxy.header_downstream_3=X-XSS-Protection "1; mode=block"'
@@ -20,7 +20,7 @@ services:
                 - caddy.filter_0=rule
                 - caddy.filter_0.path=/
                 - caddy.filter_0.search_pattern=</body>
-                - caddy.filter_0.replacement=@/root/.caddy/searx/stats.html
+                - caddy.filter_0.replacement=@/root/.caddy/searx/fathom.html
                 - caddy.filter_1=rule
                 - caddy.filter_1.path=/
                 - 'caddy.filter_1.search_pattern=type="text/javascript"'

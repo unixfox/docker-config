@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+    fathom:
+        deploy:
+            labels:
+                - 'caddy.address=privacystats.searx.be'
+                - caddy.targetport=8080
+                - caddy.proxy.transparent
+                - caddy.gzip
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.labels.cloud==aws
+                    - node.labels.os==linux
+            restart_policy:
+                condition: any
+        image: usefathom/fathom
+        entrypoint: /env_secrets_expand.sh server
+        environment:
+            - "FATHOM_DATABASE_DRIVER=mysql"
+            - "FATHOM_DATABASE_HOST=mariadb:3306"
+            - "FATHOM_DATABASE_NAME=fathom"
+            - "FATHOM_DATABASE_USER=fathom"
+            - "FATHOM_DATABASE_PASSWORD=DOCKER-SECRET->fathomdbpasswd"
+            - "FATHOM_SECRET=DOCKER-SECRET->fathomsecret"
+            - "ENTRYPOINT=/app/fathom"
+        secrets:
+            - fathomdbpasswd
+            - fathomsecret
+        volumes:
+            - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
+        networks:
+            - global
+networks:
+    global:
+        external: true
+secrets:
+    fathomdbpasswd:
+        external: true
+    fathomsecret:
+        external: true
