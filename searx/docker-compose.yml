@@ -85,7 +85,7 @@ services:
             - '/data/searx/settings.yml:/data/settings.yml:ro'
             - '/etc/hosts:/etc/hosts:ro'
             - '/etc/localtime:/etc/localtime:ro'
-            - '/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro'
+            - '/data/searx/engines/startpage.py:/usr/local/searx/searx/engines/startpage.py:ro'
             - '/data/searx/engines/google_images.py:/usr/local/searx/searx/engines/google_images.py:ro'
             - '/data/searx/webapp.py:/usr/local/searx/searx/webapp.py:ro'
             - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
