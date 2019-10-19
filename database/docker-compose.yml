@@ -6,8 +6,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.labels.cloud==aws
-                    - node.labels.os==linux
+                    - node.role == manager
             restart_policy:
                 condition: any
         environment:
