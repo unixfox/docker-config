@@ -15,9 +15,13 @@ services:
             restart_policy:
                 condition: any
         image: 'unixfox/caddy-docker-proxy:ci-alpine'
+        environment:
+            DOCKER_API_VERSION: 1.37
+            DOCKER_HOST: tcp://socket:2375
         networks:
             - global
             - bridge
+            - socket
         ports:
             -
                 mode: host
@@ -35,11 +39,32 @@ services:
                 published: 443
                 target: 443
         volumes:
-            - '/var/run/docker.sock:/var/run/docker.sock'
             - '/data/caddy:/root/.caddy'
             - '/var/log/caddy:/var/log'
             - '/etc/localtime:/etc/localtime:ro'
             - '/data/caddy/updateipv6:/updateipv6:ro'
+    socket:
+        image: tecnativa/docker-socket-proxy
+        networks:
+            - socket
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - 'node.role == manager'
+            restart_policy:
+                condition: any
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+            CONTAINERS: 1
+            SERVICES: 1
+            NETWORKS: 1
+            CONFIGS: 1
+            TASKS: 1
+            NODES: 1
+            INFO: 1
     php:
         deploy:
             labels:
@@ -56,6 +81,8 @@ services:
         networks:
             - global
 networks:
+    socket:
+        external: true
     global:
         external: true
     bridge:
