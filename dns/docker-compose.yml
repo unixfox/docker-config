@@ -17,9 +17,9 @@ services:
         environment:
             - MYSQL_HOST=mariadb
             - MYSQL_USER=powerdns
-            - MYSQL_PASS=DOCKER-SECRET->pdadbpassword
+            - MYSQL_PASS=DOCKER-SECRET->PD_DB_PASSWORD
             - MYSQL_DB=powerdns
-            - PDNS_API_KEY=DOCKER-SECRET->pdaapikey
+            - PDNS_API_KEY=DOCKER-SECRET->PD_API_KEY
             - ENTRYPOINT=/entrypoint.sh
         hostname: powerdns
         image: psitrax/powerdns
@@ -37,17 +37,18 @@ services:
                 published: 53
                 target: 53
         secrets:
-            - pdadbpassword
-            - pdaapikey
+            - PD_DB_PASSWORD
+            - PD_API_KEY
         volumes:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
             - '/data/powerdns:/etc/pdns/conf.d:ro'
             - '/etc/localtime:/etc/localtime:ro'
     powerdns-admin:
+        command: "gunicorn app:app"
         deploy:
             labels:
                 - caddy.address=dns.unixfox.eu
-                - caddy.targetport=9191
+                - caddy.targetport=80
                 - caddy.proxy.transparent
                 - 'caddy.log=/ /var/log/powerdnsadmin.log {combined}'
                 - caddy.gzip
@@ -69,22 +70,22 @@ services:
                 condition: any
         entrypoint: /env_secrets_expand.sh
         environment:
-            - ENVIRONMENT=production
-            - PDA_DB_HOST=mariadb
-            - PDA_DB_NAME=powerdnsadmin
-            - PDA_DB_USER=powerdns
-            - PDA_DB_PASSWORD=DOCKER-SECRET->pdadbpassword
-            - PDA_DB_PORT=3306
+            - SECRET_KEY=DOCKER-SECRET->PDA_SECRET_KEY
+            - SALT=DOCKER-SECRET->PDA_SALT
+            - LOG_LEVEL=WARNING
+            - LOG_FILE=logfile.log
+            - SQLALCHEMY_DATABASE_URI=DOCKER-SECRET->PDA_SQLALCHEMY_DATABASE_URI
             - PDNS_HOST=powerdns
-            - PDNS_API_KEY=DOCKER-SECRET->pdaapikey
-            - FLASK_APP=/powerdns-admin/app/__init__.py
-            - ENTRYPOINT=/entrypoint.sh
-        image: quay.io/unixfox/powerdns-admin
+            - PDNS_API_KEY=DOCKER-SECRET->PD_API_KEY
+            - ENTRYPOINT=/usr/local/bin/entrypoint.sh
+        image: ngoduykhanh/powerdns-admin
         networks:
             - global
         secrets:
-            - pdadbpassword
-            - pdaapikey
+            - PDA_SECRET_KEY
+            - PDA_SALT
+            - PDA_SQLALCHEMY_DATABASE_URI
+            - PD_API_KEY
         volumes:
             - '/data/powerdnsadmin/config.py:/powerdns-admin/config.py'
             - 'powerdns-admin-assets:/powerdns-admin/app/static'
@@ -96,9 +97,15 @@ networks:
     global:
         external: true
 secrets:
-    pdaapikey:
+    PD_DB_PASSWORD:
         external: true
-    pdadbpassword:
+    PDA_SQLALCHEMY_DATABASE_URI:
+        external: true
+    PDA_SALT:
+        external: true
+    PDA_SECRET_KEY:
+        external: true
+    PD_API_KEY:
         external: true
 volumes:
     powerdns-admin-assets: null
