@@ -1,0 +1,69 @@
+version: "3.7"
+services:
+    deluge:
+        deploy:
+            labels:
+                - caddy.address=seedbox.unixfox.eu
+                - caddy.targetport=8112
+                - caddy.proxy.transparent
+                - caddy.tls.dns=powerdns
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+        ports:
+            - mode: host
+              protocol: udp
+              published: 58946
+              target: 58946
+            - mode: host
+              protocol: tcp
+              published: 58946
+              target: 58946
+            - mode: host
+              protocol: tcp
+              published: 58846
+              target: 58846
+        image: "linuxserver/deluge"
+        networks:
+            - global
+            - bridge
+        environment:
+            - 'TZ=Europe/Brussels'
+            - 'PUID=1000'
+            - 'PGID=1000'
+            - 'DELUGE_LOGLEVEL=error'
+        volumes:
+            - '/data/deluge/config:/config'
+            - '/data/deluge/downloads:/downloads'
+            - '/etc/localtime:/etc/localtime:ro'
+
+    filebrowser:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+                - caddy.address=torrent.unixfox.eu
+                - caddy.targetport=80
+                - caddy.proxy.transparent
+                - caddy.tls.dns=powerdns
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+        image: "filebrowser/filebrowser"
+        networks:
+            - global
+        volumes:
+            - '/data/deluge/filebrowser.db:/database.db'
+            - '/data/deluge/downloads:/srv'
+            - '/data/deluge/.filebrowser.json:/.filebrowser.json'
+            - '/etc/localtime:/etc/localtime:ro'
+
+networks:
+    global:
+        external: true
+    bridge:
+        external: true

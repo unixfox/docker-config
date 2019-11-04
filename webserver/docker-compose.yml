@@ -1,48 +1,52 @@
-version: '3.7'
+version: "3.7"
 services:
     caddy:
-        command: '-email contact@emiliendevos.be -agree=true -log stdout'
+        command: "-agree=true -log stdout -docker-validate-network=false"
         deploy:
+            mode: global
             labels:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - 'node.role == manager'
-            resources:
-                reservations:
-                    cpus: '0.1'
-                    memory: 200M
+                    - node.labels.webserver==caddy
             restart_policy:
                 condition: any
-        image: 'unixfox/caddy-docker-proxy:ci-alpine'
+        image: "unixfox/caddy-docker-proxy:ci-alpine"
+        entrypoint: /env_secrets_expand.sh
         environment:
-            DOCKER_API_VERSION: 1.37
-            DOCKER_HOST: tcp://socket:2375
+            - DOCKER_API_VERSION=1.37
+            - DOCKER_HOST=tcp://socket:2375
+            - CADDY_CLUSTERING=redis
+            - CADDY_CLUSTERING_REDIS_HOST=redis
+            - PDNS_API_URL=http://powerdns:8081
+            - PDNS_API_KEY=DOCKER-SECRET->PD_API_KEY
+            - CODING_GITHUB_CLIENT_SECRET=DOCKER-SECRET->CODING_GITHUB_CLIENT_SECRET
+            - ENTRYPOINT=/bin/caddy
         networks:
             - global
             - bridge
             - socket
+        secrets:
+            - CODING_GITHUB_CLIENT_SECRET
+            - PD_API_KEY
         ports:
-            -
-                mode: host
-                protocol: tcp
-                published: 80
-                target: 80
-            -
-                mode: host
-                protocol: tcp
-                published: 8080
-                target: 8080
-            -
-                mode: host
-                protocol: tcp
-                published: 443
-                target: 443
+            - mode: host
+              protocol: tcp
+              published: 80
+              target: 80
+            - mode: host
+              protocol: tcp
+              published: 8080
+              target: 8080
+            - mode: host
+              protocol: tcp
+              published: 443
+              target: 443
         volumes:
-            - '/data/caddy:/root/.caddy'
-            - '/var/log/caddy:/var/log'
-            - '/etc/localtime:/etc/localtime:ro'
-            - '/data/caddy/updateipv6:/updateipv6:ro'
+            - "/data/caddy:/root/.caddy"
+            - "/var/log/caddy:/var/log"
+            - "/etc/localtime:/etc/localtime:ro"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
     socket:
         image: tecnativa/docker-socket-proxy
         networks:
@@ -52,7 +56,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - 'node.role == manager'
+                    - "node.role == manager"
             restart_policy:
                 condition: any
         volumes:
@@ -65,21 +69,39 @@ services:
             TASKS: 1
             NODES: 1
             INFO: 1
-    php:
-        deploy:
-            labels:
-                - com.ouroboros.enable=true
-            placement:
-                constraints:
-                    - node.labels.cloud==aws
-                    - node.labels.os==linux
-            restart_policy:
-                condition: any
-        volumes:
-            - '/etc/localtime:/etc/localtime:ro'
-        image: 'php:fpm'
+    redis:
+        image: redis:alpine
         networks:
             - global
+        volumes:
+            - "/data/redis:/data"
+        deploy:
+            placement:
+                constraints:
+                    - "node.role == manager"
+            restart_policy:
+                condition: any
+    # php:
+    #     deploy:
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         placement:
+    #             constraints:
+    #                 - node.hostname == azurelinuxdocker
+    #         restart_policy:
+    #             condition: any
+    #     volumes:
+    #         - "/etc/localtime:/etc/localtime:ro"
+    #     image: "php:fpm"
+    #     networks:
+    #         - global
+
+secrets:
+    PD_API_KEY:
+        external: true
+    CODING_GITHUB_CLIENT_SECRET:
+        external: true
+
 networks:
     socket:
         external: true

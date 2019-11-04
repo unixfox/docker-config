@@ -1,0 +1,1 @@
+echo "$(docker-compose -f ./docker-compose.yml config 2>/dev/null)" | docker stack deploy -c- mail

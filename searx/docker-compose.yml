@@ -47,7 +47,6 @@ services:
                 - 'caddy.rewrite_1.if_1={remote} is "5.9.58.49"'
                 - 'caddy.rewrite_1.if_op=or'
                 - caddy.rewrite_1.to=/about
-                - 'caddy.on=startup /updateipv6'
                 - com.ouroboros.enable=true
             placement:
                 constraints:
@@ -69,7 +68,7 @@ services:
             mode: global
             placement:
                 constraints:
-                    - node.labels.os==linux
+                    - node.labels.searx == yes
             restart_policy:
                 condition: any
         environment:
@@ -78,8 +77,8 @@ services:
             - PUID=0
         image: woahbase/alpine-searx
         networks:
-            - bridge
             - global
+            - bridge
         volumes:
             - '/data/searx/settings.yml:/data/settings.yml:ro'
             - '/etc/hosts:/etc/hosts:ro'

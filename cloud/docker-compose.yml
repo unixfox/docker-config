@@ -1,0 +1,30 @@
+version: "3.7"
+services:
+    nextcloud:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+                - caddy.address=nextcloud.unixfox.eu
+                - caddy.targetport=8888
+                - caddy.proxy.transparent
+            placement:
+                constraints:
+                    - node.hostname == azurelinuxdocker
+            restart_policy:
+                condition: any
+        image: "benyanke/nextcloud"
+        networks:
+            - global
+        environment:
+            TZ: Europe/Brussels
+            DOMAIN: nextcloud.unixfox.eu
+            DB_TYPE: mysql
+        volumes:
+            - '/data/nextcloud/data:/data'
+            - '/data/nextcloud/config:/config'
+            - '/data/nextcloud/apps:/apps2'
+            - '/data/nextcloud/themes:/themes'
+            - '/etc/localtime:/etc/localtime:ro'
+networks:
+    global:
+        external: true

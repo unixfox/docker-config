@@ -25,6 +25,7 @@ services:
         image: psitrax/powerdns
         networks:
             - global
+            - bridge
         ports:
             -
                 mode: host
@@ -95,6 +96,8 @@ services:
             - '/etc/localtime:/etc/localtime:ro'
 networks:
     global:
+        external: true
+    bridge:
         external: true
 secrets:
     PD_DB_PASSWORD:

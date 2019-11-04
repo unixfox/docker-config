@@ -2,6 +2,7 @@ version: '3.7'
 services:
     vscode:
         image: unixfox/code-server
+        command: "--auth none --disable-updates"
         deploy:
             labels:
                 - com.ouroboros.enable=true
@@ -13,9 +14,10 @@ services:
                 - caddy.jwt.redirect=/login
                 - caddy.jwt.allow=sub unixfox
                 - caddy.login.success_url=/
-                - 'caddy.login.github=client_id=0be63859809f40d5e2b0,client_secret=3fc95dfcf1bfa321ec202281b75a27090fe56bde'
+                - 'caddy.login.github=client_id=0be63859809f40d5e2b0,client_secret={%CODING_GITHUB_CLIENT_SECRET%}'
                 - caddy.login.jwt_expiry=24h
                 - caddy.login.cookie_expiry=24h
+                - caddy.tls.dns=powerdns
             placement:
                 constraints:
                     - node.hostname == awsfakewinlux

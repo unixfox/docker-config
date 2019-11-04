@@ -1,0 +1,197 @@
+version: "3.6"
+
+services:
+    redis:
+        image: redis:alpine
+        networks:
+            - default
+        volumes:
+            - "/data/mailu/redis:/data"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+
+    # Core services
+    front:
+        image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-1.6}
+        env_file: mailu.env
+        entrypoint: /env_secrets_expand.sh
+        secrets:
+            - MAILU_SECRET_KEY
+            - MAILU_DB_PW
+        hostname: front
+        logging:
+            driver: json-file
+        ports:
+            - target: 25
+              published: 25
+              mode: host
+            - target: 465
+              published: 465
+              mode: host
+            - target: 587
+              published: 587
+              mode: host
+            - target: 110
+              published: 110
+              mode: host
+            - target: 995
+              published: 995
+              mode: host
+            - target: 143
+              published: 143
+              mode: host
+            - target: 993
+              published: 993
+              mode: host
+        volumes:
+            - "/data/mailu/certs/live/mx.emiliendevos.be/fullchain.pem:/certs/cert.pem:ro"
+            - "/data/mailu/certs/live/mx.emiliendevos.be/privkey.pem:/certs/key.pem:ro"
+            - "/data/mailu/overrides/nginx:/overrides"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
+        networks:
+            - default
+            - global
+            - bridge
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            labels:
+                - com.ouroboros.enable=true
+                - caddy.address=mx.emiliendevos.be
+                - caddy.targetport=80
+                - caddy.proxy.transparent
+                - caddy.tls.dns=powerdns
+            restart_policy:
+                condition: any
+            replicas: 1
+
+    certbot:
+        image: adferrand/letsencrypt-dns
+        environment:
+            - LEXICON_PROVIDER=powerdns
+            - LETSENCRYPT_USER_MAIL=contact@google.com
+        volumes:
+            - "/data/mailu/certs:/etc/letsencrypt"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+            labels:
+                - com.ouroboros.enable=true
+            replicas: 1
+    admin:
+        image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-1.6}
+        env_file: mailu.env
+        entrypoint: /env_secrets_expand.sh
+        secrets:
+            - MAILU_SECRET_KEY
+            - MAILU_DB_PW
+        networks:
+            - default
+            - global
+        volumes:
+            - "/data/mailu/data:/data"
+            - "/data/mailu/dkim:/dkim"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            replicas: 1
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+
+    imap:
+        image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-1.6}
+        env_file: mailu.env
+        entrypoint: /env_secrets_expand.sh
+        secrets:
+            - MAILU_SECRET_KEY
+            - MAILU_DB_PW
+        networks:
+            - default
+        volumes:
+            - "/data/mailu/mail:/mail"
+            - "/data/mailu/overrides:/overrides"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            replicas: 1
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+
+    smtp:
+        image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-1.6}
+        env_file: mailu.env
+        entrypoint: /env_secrets_expand.sh
+        secrets:
+            - MAILU_SECRET_KEY
+            - MAILU_DB_PW
+        networks:
+            - default
+        environment:
+            - POD_ADDRESS_RANGE=10.0.6.0/24
+        volumes:
+            - "/data/mailu/overrides:/overrides"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            replicas: 1
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+
+    antispam:
+        image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-1.6}
+        env_file: mailu.env
+        entrypoint: /env_secrets_expand.sh
+        secrets:
+            - MAILU_SECRET_KEY
+            - MAILU_DB_PW
+        networks:
+            - default
+        volumes:
+            - "/data/mailu/filter:/var/lib/rspamd"
+            - "/data/mailu/dkim:/dkim"
+            - "/data/mailu/overrides/rspamd:/etc/rspamd/override.d"
+            - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            replicas: 1
+            restart_policy:
+                condition: any
+            labels:
+                - com.ouroboros.enable=true
+
+secrets:
+    MAILU_SECRET_KEY:
+        external: true
+    MAILU_DB_PW:
+        external: true
+
+networks:
+    global:
+        external: true
+    default:
+        external:
+            name: mail_default
+    bridge:
+        external: true

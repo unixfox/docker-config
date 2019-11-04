@@ -1,0 +1,11 @@
+ipv6nat:
+    image: robbertkl/ipv6nat
+    restart: always
+    privileged: true
+    network_mode: "host"
+    labels:
+        - 'com.ouroboros.enable=true'
+    volumes:
+        - '/var/run/docker.sock:/var/run/docker.sock:ro'
+        - '/lib/modules:/lib/modules:ro'
+        - "/etc/localtime:/etc/localtime:ro"

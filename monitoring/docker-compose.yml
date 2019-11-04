@@ -1,15 +1,29 @@
 version: '3.7'
 services:
-    netdata:
+    datadog:
         deploy:
             labels:
                 - com.ouroboros.enable=true
+            mode: global
             restart_policy:
                 condition: any
-        image: titpetric/netdata
-        network_mode: host
-        privileged: true
+        environment:
+            - 'DD_API_KEY='
+        image: datadog/docker-dd-agent
         volumes:
-            - '/proc:/host/proc:ro'
-            - '/sys:/host/sys:ro'
-            - '/etc/localtime:/etc/localtime:ro'
+            - '/var/run/docker.sock:/var/run/docker.sock:ro'
+            - '/proc/:/host/proc/:ro'
+            - '/sys/fs/cgroup/:/host/sys/fs/cgroup:ro'
+    # netdata:
+    #     deploy:
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         restart_policy:
+    #             condition: any
+    #     image: titpetric/netdata
+    #     network_mode: host
+    #     privileged: true
+    #     volumes:
+    #         - '/proc:/host/proc:ro'
+    #         - '/sys:/host/sys:ro'
+    #         - '/etc/localtime:/etc/localtime:ro'
