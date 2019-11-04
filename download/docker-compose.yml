@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+    rclone:
+        command: "serve http --addr 0.0.0.0:80 --read-only --no-modtime arubaisocrypt:"
+        deploy:
+            labels:
+                - caddy.address=dl.unixfox.eu
+                - caddy.targetport=80
+                - caddy.proxy.transparent
+                - caddy.tls.dns=powerdns
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+        image: "unixfox/rclone-iso"
+        networks:
+            - global
+        volumes:
+            - '/data/rclone:/config/rclone'
+
+networks:
+    global:
+        external: true
