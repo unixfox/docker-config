@@ -10,7 +10,7 @@ services:
                 - caddy.tls.dns=powerdns
             placement:
                 constraints:
-                    - node.hostname == azurelinuxdocker
+                    - node.hostname == azurewinluxdocker
             restart_policy:
                 condition: any
         image: "benyanke/nextcloud"
