@@ -1,4 +1,7 @@
-ipv6nat:
+version: '3.7'
+
+services:
+  ipv6nat:
     image: robbertkl/ipv6nat
     restart: always
     privileged: true
