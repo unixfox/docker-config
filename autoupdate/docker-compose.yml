@@ -1,29 +1,44 @@
 version: '3.7'
 services:
-    ouroboros:
+    # ouroboros:
+    #     deploy:
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         placement:
+    #             constraints:
+    #                 - 'node.role == manager'
+    #         restart_policy:
+    #             condition: any
+    #     environment:
+    #         - CLEANUP=true
+    #         - INTERVAL=600
+    #         - SELF_UPDATE=true
+    #         - TZ=Europe/Brussels
+    #         - SWARM=true
+    #         - LOG_LEVEL=debug
+    #     image: pyouroboros/ouroboros
+    #     volumes:
+    #         - '/var/run/docker.sock:/var/run/docker.sock'
+    #         - '/etc/localtime:/etc/localtime:ro'
+    shepherd:
         deploy:
             labels:
-                - com.ouroboros.enable=true
+                - com.mydomain.autodeploy
             placement:
                 constraints:
                     - 'node.role == manager'
             restart_policy:
                 condition: any
         environment:
-            - CLEANUP=true
-            - INTERVAL=600
-            - SELF_UPDATE=true
-            - TZ=Europe/Brussels
-            - SWARM=true
-            - LOG_LEVEL=debug
-        image: pyouroboros/ouroboros
+            - SLEEP_TIME=5m
+            - BLACKLIST_SERVICES="autoupdate_prune"
+            - FILTER_SERVICES=label=com.ouroboros.enable=true
+        image: mazzolino/shepherd
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
             - '/etc/localtime:/etc/localtime:ro'
     prune:
         deploy:
-            labels:
-                - com.ouroboros.enable=true
             mode: global
             restart_policy:
                 condition: any

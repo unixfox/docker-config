@@ -50,7 +50,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.role == manager
+                    - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
         image: unixfox/antibot-proxy
@@ -68,7 +68,7 @@ services:
             mode: global
             placement:
                 constraints:
-                    - node.labels.searx == yes
+                    - node.labels.searx==yes
             restart_policy:
                 condition: any
         environment:
