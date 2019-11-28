@@ -26,6 +26,10 @@ services:
                 - caddy.filter_1.path=/
                 - caddy.filter_1.search_pattern=Invidious</a>
                 - caddy.filter_1.replacement="YewTube</a>"
+                - caddy.filter_2=rule
+                - caddy.filter_2.path=/
+                - caddy.filter_2.search_pattern=Invidious</title>
+                - caddy.filter_2.replacement="YewTube</title>"
                 - com.ouroboros.enable=true
             placement:
                 constraints:
