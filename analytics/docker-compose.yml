@@ -3,7 +3,7 @@ services:
     fathom:
         deploy:
             labels:
-                - 'caddy.address=privacystats.searx.be'
+                - 'caddy.address=privacystats.searx.be privacystats.yewtu.be'
                 - caddy.targetport=8080
                 - caddy.proxy.transparent
                 - caddy.gzip
@@ -15,6 +15,12 @@ services:
                 condition: any
         image: usefathom/fathom
         entrypoint: /env_secrets_expand.sh server
+        healthcheck:
+            test: "/usr/bin/wget --quiet --tries=1 --spider http://localhost:8080/ || exit 1"
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
         environment:
             - "FATHOM_DATABASE_DRIVER=mysql"
             - "FATHOM_DATABASE_HOST=mariadb:3306"

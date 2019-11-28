@@ -23,6 +23,12 @@ services:
                     - node.hostname == awsfakewinlux
             restart_policy:
                 condition: any
+        healthcheck:
+            test: "curl --fail http://localhost:8080/ || exit 1"
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
         networks:
             - global
         volumes:

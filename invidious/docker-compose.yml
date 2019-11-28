@@ -1,0 +1,52 @@
+version: '3.7'
+services:
+    invidious:
+        deploy:
+            mode: global
+            labels:
+                - 'caddy.address=yewtu.be www.yewtu.be'
+                - caddy.targetport=3000
+                - caddy.proxy.transparent
+                - caddy.proxy.header_downstream=-server
+                - 'caddy.cache.match_path=/vi'
+                - 'caddy.cache.match_header=Content-Type image/jpg image/jpeg'
+                - 'caddy.cache.default_max_age=24h'
+                - 'caddy.proxy.header_downstream_1=X-Robots-Tag "noindex, nofollow"'
+                - 'caddy.proxy.header_downstream_2=X-Content-Type-Options nosniff'
+                - 'caddy.proxy.header_downstream_3=X-Frame-Options sameorigin'
+                - 'caddy.proxy.header_downstream_4=X-XSS-Protection "1; mode=block"'
+                - 'caddy.proxy.header_downstream_5=referrer-policy "same-origin"'
+                - 'caddy.proxy.header_downstream_6=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
+                - 'caddy.proxy.header_downstream_7=content-security-policy "default-src blob: data: ''self'' https://yewtu.be https://privacystats.yewtu.be ''unsafe-inline'' ''unsafe-eval''; media-src blob: ''self'' https://yewtu.be https://*.googlevideo.com:443"'
+                - caddy.filter_0=rule
+                - caddy.filter_0.path=/$$
+                - caddy.filter_0.search_pattern=</body>
+                - caddy.filter_0.replacement=@/root/.caddy/invidious/fathom.html
+                - caddy.filter_1=rule
+                - caddy.filter_1.path=/
+                - caddy.filter_1.search_pattern=Invidious</a>
+                - caddy.filter_1.replacement="YewTube</a>"
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.labels.invidious==yes
+            restart_policy:
+                condition: any
+        healthcheck:
+            test: "curl --fail http://localhost:3000/ || exit 1"
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        image: flourgaz/invidious
+        networks:
+            - global
+            - bridge
+        volumes:
+            - '/etc/localtime:/etc/localtime:ro'
+            - '/data/invidious/config.yml:/invidious/config/config.yml:ro'
+networks:
+    global:
+        external: true
+    bridge:
+        external: true

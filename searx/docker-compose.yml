@@ -18,7 +18,7 @@ services:
                 - 'caddy.proxy.header_downstream_4=referrer-policy "no-referrer, strict-origin-when-cross-origin"'
                 - 'caddy.proxy.header_downstream_5=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
                 - caddy.filter_0=rule
-                - caddy.filter_0.path=/
+                - caddy.filter_0.path=/$$
                 - caddy.filter_0.search_pattern=</body>
                 - caddy.filter_0.replacement=@/root/.caddy/searx/fathom.html
                 - caddy.filter_1=rule
@@ -71,6 +71,12 @@ services:
                     - node.labels.searx==yes
             restart_policy:
                 condition: any
+        healthcheck:
+            test: "/usr/bin/wget --quiet --tries=1 --spider http://localhost:8888/?q=searx || exit 1"
+            interval: 5m
+            timeout: 20s
+            retries: 3
+            start_period: 20s
         environment:
             - 'BASE_URL=https://searx.be'
             - PGID=0
@@ -84,7 +90,6 @@ services:
             - '/etc/hosts:/etc/hosts:ro'
             - '/etc/localtime:/etc/localtime:ro'
             - '/data/searx/engines/startpage.py:/usr/local/searx/searx/engines/startpage.py:ro'
-            - '/data/searx/engines/google_images.py:/usr/local/searx/searx/engines/google_images.py:ro'
             - '/data/searx/webapp.py:/usr/local/searx/searx/webapp.py:ro'
             - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
 networks:

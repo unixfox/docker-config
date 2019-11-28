@@ -14,6 +14,12 @@ services:
                     - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
+        healthcheck:
+            test: "/usr/bin/wget --quiet --tries=1 --spider http://localhost:80/ || exit 1"
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
         image: "unixfox/rclone-iso"
         networks:
             - global
