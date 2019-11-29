@@ -2,6 +2,9 @@ version: '3.7'
 services:
     invidious:
         deploy:
+            resources:
+                limits:
+                    cpus: '0.50'
             mode: global
             labels:
                 - 'caddy.address=yewtu.be www.yewtu.be'
