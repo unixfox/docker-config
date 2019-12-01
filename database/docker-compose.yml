@@ -6,7 +6,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.role == manager
+                    - node.hostname == awslinuxdocker
             restart_policy:
                 condition: any
         environment:
@@ -30,7 +30,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.role == manager
+                    - node.hostname == awslinuxdocker
             restart_policy:
                 condition: any
         healthcheck:
