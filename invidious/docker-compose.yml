@@ -12,7 +12,7 @@ services:
                 - caddy.proxy.header_downstream=-server
                 - 'caddy.cache.match_path=/vi'
                 - 'caddy.cache.match_header=Content-Type image/jpg image/jpeg'
-                - 'caddy.cache.default_max_age=24h'
+                - 'caddy.cache.default_max_age=1h'
                 - 'caddy.proxy.header_downstream_1=X-Robots-Tag "noindex, nofollow"'
                 - 'caddy.proxy.header_downstream_2=X-Content-Type-Options nosniff'
                 - 'caddy.proxy.header_downstream_3=X-Frame-Options sameorigin'
