@@ -4,8 +4,7 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: '0.50'
-            mode: global
+                    memory: 200M
             labels:
                 - 'caddy.address=yewtu.be www.yewtu.be'
                 - caddy.targetport=3000
@@ -36,7 +35,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.labels.invidious==yes
+                    - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
         healthcheck:
