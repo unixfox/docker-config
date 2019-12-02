@@ -1,10 +1,29 @@
 version: '3.7'
 services:
+    postgres:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == oracledockerstandard
+            restart_policy:
+                condition: any
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "postgres"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        image: postgres:alpine
+        networks:
+            - bridge
+            - global
+        volumes:
+            - '/data/invidious/postgres:/var/lib/postgresql/data'
+            - '/etc/localtime:/etc/localtime:ro'
     invidious:
         deploy:
-            resources:
-                limits:
-                    memory: 200M
             labels:
                 - 'caddy.address=yewtu.be www.yewtu.be'
                 - caddy.targetport=3000
@@ -35,7 +54,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.hostname == mx.emiliendevos.be
+                    - node.hostname == oracledockerstandard
             restart_policy:
                 condition: any
         healthcheck:

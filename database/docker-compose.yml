@@ -24,28 +24,6 @@ services:
         volumes:
             - '/data/mariadb:/var/lib/mysql'
             - '/etc/localtime:/etc/localtime:ro'
-    postgres:
-        deploy:
-            labels:
-                - com.ouroboros.enable=true
-            placement:
-                constraints:
-                    - node.hostname == awslinuxdocker
-            restart_policy:
-                condition: any
-        healthcheck:
-            test: ["CMD", "pg_isready", "-U", "postgres"]
-            interval: 1m30s
-            timeout: 10s
-            retries: 3
-            start_period: 10s
-        image: postgres:alpine
-        networks:
-            - bridge
-            - global
-        volumes:
-            - '/data/postgres:/var/lib/postgresql/data'
-            - '/etc/localtime:/etc/localtime:ro'
 networks:
     global:
         external: true

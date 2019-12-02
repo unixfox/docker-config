@@ -6,9 +6,6 @@ services:
             mode: global
             labels:
                 - com.ouroboros.enable=true
-            placement:
-                constraints:
-                    - node.labels.webserver==caddy
             restart_policy:
                 condition: any
         image: "unixfox/caddy-docker-proxy:ci-alpine"
