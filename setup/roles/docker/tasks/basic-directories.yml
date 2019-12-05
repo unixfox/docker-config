@@ -1,0 +1,10 @@
+---
+- name: create syncthing directory
+  file: 
+    path: /opt/syncthing
+    state: directory
+
+- name: create main data directory
+  file: 
+    path: /data
+    state: directory

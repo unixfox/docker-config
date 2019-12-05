@@ -1,0 +1,9 @@
+---
+- name: join docker swarm
+  docker_swarm:
+    state: join
+    advertise_addr: "{{ ipify_public_ip }}"
+    join_token: SWMTKN-1-1lgsb56qiv6iiihoqfi4cl6gio58b1ri22qcvzqns2nuiraih2-an4os64eimarebpuma0zrnqhd
+    remote_addrs: [ '94.177.213.96:2377' ]
+  vars:
+    ansible_python_interpreter: /usr/bin/python3

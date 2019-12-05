@@ -1,0 +1,5 @@
+---
+user_username: unixfox
+zerotier_authorize_member: true
+zerotier_api_url: https://my.zerotier.com
+zerotier_api_delegate: localhost

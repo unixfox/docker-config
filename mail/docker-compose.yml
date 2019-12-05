@@ -21,7 +21,7 @@ services:
         entrypoint: /env_secrets_expand.sh
         secrets:
             - MAILU_SECRET_KEY
-            - MAILU_DB_PW
+            - MAILU_DB_PASSWORD
         hostname: front
         logging:
             driver: json-file
@@ -92,7 +92,7 @@ services:
         entrypoint: /env_secrets_expand.sh
         secrets:
             - MAILU_SECRET_KEY
-            - MAILU_DB_PW
+            - MAILU_DB_PASSWORD
         networks:
             - default
             - global
@@ -116,7 +116,7 @@ services:
         entrypoint: /env_secrets_expand.sh
         secrets:
             - MAILU_SECRET_KEY
-            - MAILU_DB_PW
+            - MAILU_DB_PASSWORD
         networks:
             - default
         volumes:
@@ -139,7 +139,7 @@ services:
         entrypoint: /env_secrets_expand.sh
         secrets:
             - MAILU_SECRET_KEY
-            - MAILU_DB_PW
+            - MAILU_DB_PASSWORD
         networks:
             - default
         environment:
@@ -163,7 +163,7 @@ services:
         entrypoint: /env_secrets_expand.sh
         secrets:
             - MAILU_SECRET_KEY
-            - MAILU_DB_PW
+            - MAILU_DB_PASSWORD
         networks:
             - default
         volumes:
@@ -181,10 +181,40 @@ services:
             labels:
                 - com.ouroboros.enable=true
 
+    db:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            restart_policy:
+                condition: any
+        secrets:
+            - MAILU_DB_PASSWORD
+        environment:
+            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+            MYSQL_DATABASE: mailu
+            MYSQL_USER: mailu
+            MYSQL_PASSWORD_FILE: /run/secrets/MAILU_DB_PASSWORD
+        image: mariadb
+        healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        networks:
+            - default
+            - bridge
+        volumes:
+            - '/data/mailu/mariadb:/var/lib/mysql'
+            - '/etc/localtime:/etc/localtime:ro'
+
 secrets:
     MAILU_SECRET_KEY:
         external: true
-    MAILU_DB_PW:
+    MAILU_DB_PASSWORD:
         external: true
 
 networks:

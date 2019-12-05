@@ -8,6 +8,7 @@ services:
             placement:
                 constraints:
                     - node.labels.os==linux
+                    - node.labels.cloud!=aws
             restart_policy:
                 condition: any
         environment:

@@ -1,0 +1,7 @@
+---
+- name: Get public IPv4
+  ipify_facts:
+    timeout: 20
+
+# - name: get vault
+#   include_vars: vault.yml

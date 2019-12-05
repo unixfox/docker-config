@@ -1,0 +1,11 @@
+---
+- name: Add labels
+  docker_node:
+    hostname: "{{ ansible_hostname }}"
+    labels:
+      os: linux
+      cloud: "{{ item }}"
+    docker_host: "{{ docker_host }}"
+  with_items: "{{ group_names }}"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3

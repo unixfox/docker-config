@@ -1,0 +1,30 @@
+---
+- name: Update ansible_local facts
+  script: set_facts.sh
+
+- name: Re-gather facts
+    setup: ~
+
+- name: Authorize new members to network
+  uri:
+    url: "{{ zerotier_api_url }}/api/network/{{ zerotier_network_id }}/member/{{ ansible_local.zerotier.node_id }}"
+    method: POST
+    headers:
+      Authorization: bearer {{ zerotier_api_accesstoken }}
+    body:
+      hidden: false
+      config:
+        authorized: "{{ zerotier_authorize_member }}"
+    body_format: json
+
+- name: Configure members in network
+  uri:
+    url: "{{ zerotier_api_url }}/api/network/{{ zerotier_network_id }}/member/{{ ansible_local.zerotier.node_id }}"
+    method: POST
+    headers:
+      Authorization: bearer {{ zerotier_api_accesstoken }}
+    body:
+      name: "{{ ansible_hostname }}"
+      config:
+        ipAssignments: "[ '{{ zerotier_member_ip_assignments }}' ]"
+    body_format: json

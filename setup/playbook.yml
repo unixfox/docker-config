@@ -1,0 +1,23 @@
+---
+- name: Raw install python
+  hosts: all
+  remote_user: root
+  gather_facts: false
+  tasks:
+    - raw: apk add python
+
+- name: Configure VPS for Docker Swarm
+  hosts: all
+  remote_user: root
+  # remote_user: user
+  # become: yes
+  # become_method: sudo
+
+  roles:
+    - requirements
+    - base
+    - user
+    - { role: ipv6, when: ipv6_he_subnet is defined }
+    - zerotier
+    - docker
+    - security

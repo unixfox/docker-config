@@ -1,0 +1,14 @@
+---
+- name: Insert IPv6 configuration
+  blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      auto he-ipv6
+      iface he-ipv6 inet6 v4tunnel
+        address {{ ipv6_he_subnet }}::2
+        netmask 64
+        endpoint {{ ipv6_he_endpoint }}
+        local {{ ansible_default_ipv4.address }}
+        ttl 255
+        gateway {{ ipv6_he_subnet }}::1
+  notify: restart networking

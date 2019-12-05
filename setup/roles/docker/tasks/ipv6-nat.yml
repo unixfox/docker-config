@@ -1,0 +1,16 @@
+---
+- name: Ensures that IPv6 NAT stack directory
+  file: 
+    path: /root/network
+    state: directory
+
+- name: Copy IPv6 NAT files
+  copy:
+    src: network/docker-compose.yml
+    dest: /root/network
+
+- name: Start IPv6 NAT
+  docker_compose:
+    project_src: /root/network
+  vars:
+    ansible_python_interpreter: /usr/bin/python3

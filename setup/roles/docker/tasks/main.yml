@@ -1,0 +1,29 @@
+---
+- name: Install packages
+  apk:
+    name: docker,docker-compose,docker-py
+
+- name: Ensures that config directory exist
+  file: 
+    path: /etc/docker
+    state: directory
+
+- name: Add custom config
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: start and enable docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Wait for Docker to come up
+  wait_for:
+    path: /var/run/docker.sock
+
+- include: ipv6-nat.yml
+- include: join-swarm.yml
+- include: basic-directories.yml
+- include: add-labels.yml

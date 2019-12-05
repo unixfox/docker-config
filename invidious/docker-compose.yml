@@ -24,14 +24,15 @@ services:
             - '/etc/localtime:/etc/localtime:ro'
     invidious:
         deploy:
+            replicas: 5
+            resources:
+                limits:
+                    memory: 400M
             labels:
                 - 'caddy.address=yewtu.be www.yewtu.be'
                 - caddy.targetport=3000
                 - caddy.proxy.transparent
                 - caddy.proxy.header_downstream=-server
-                - 'caddy.cache.match_path=/vi'
-                - 'caddy.cache.match_header=Content-Type image/jpg image/jpeg'
-                - 'caddy.cache.default_max_age=1h'
                 - 'caddy.proxy.header_downstream_1=X-Robots-Tag "noindex, nofollow"'
                 - 'caddy.proxy.header_downstream_2=X-Content-Type-Options nosniff'
                 - 'caddy.proxy.header_downstream_3=X-Frame-Options sameorigin'
@@ -39,6 +40,11 @@ services:
                 - 'caddy.proxy.header_downstream_5=referrer-policy "same-origin"'
                 - 'caddy.proxy.header_downstream_6=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
                 - 'caddy.proxy.header_downstream_7=content-security-policy "default-src blob: data: ''self'' https://yewtu.be https://privacystats.yewtu.be ''unsafe-inline'' ''unsafe-eval''; media-src blob: ''self'' https://yewtu.be https://*.googlevideo.com:443"'
+                - 'caddy.log=/ /var/log/invidious.log "{combined} - {latency}"'
+                - 'caddy.status_0=429 /api/v1/videos'
+                - 'caddy.status_1=429 /api/v1/channels'
+                - 'caddy.status_2=429 /api/v1/search'
+                - 'caddy.status_3=429 /api/v1/mixes'
                 - caddy.filter_0=rule
                 - caddy.filter_0.path=/$$
                 - caddy.filter_0.search_pattern=</body>
@@ -59,10 +65,10 @@ services:
                 condition: any
         healthcheck:
             test: "curl --fail http://localhost:3000/ || exit 1"
-            interval: 1m30s
+            interval: 30s
             timeout: 10s
             retries: 3
-            start_period: 10s
+            start_period: 1s
         image: flourgaz/invidious
         networks:
             - global

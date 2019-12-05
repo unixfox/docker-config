@@ -1,0 +1,24 @@
+---
+- name: Adding main user
+  user:
+    name: "{{ user_username }}"
+    shell: /bin/bash
+    groups: wheel
+    append: yes
+    update_password: on_create
+    password: '*'
+    
+- name: Set authorized key to user
+  authorized_key:
+    user: "{{ user_username }}"
+    state: present
+    key: https://github.com/{{ user_username }}.keys
+    validate_certs: True
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'

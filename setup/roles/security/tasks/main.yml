@@ -1,0 +1,29 @@
+---
+- name: Disable password openssh server
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regex: ^(# *)?PasswordAuthentication
+    line: PasswordAuthentication no
+
+- name: Disable ChallengeResponse SSH
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#?ChallengeResponseAuthentication'
+    line: 'ChallengeResponseAuthentication no'
+
+- name: Enable pubkey authentification SSH
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#?PubkeyAuthentication'
+    line: 'PubkeyAuthentication yes'
+
+- name: Disable root login SSH
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin No'
+
+- name: restart ssh
+  service:
+    name: sshd
+    state: reloaded

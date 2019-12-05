@@ -63,6 +63,9 @@ services:
             - '/data/searx/config.toml:/app/config.toml:ro'
     searx:
         deploy:
+            placement:
+                constraints:
+                    - node.labels.cloud!=aws
             labels:
                 - com.ouroboros.enable=true
             mode: global

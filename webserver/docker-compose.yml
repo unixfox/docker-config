@@ -3,6 +3,10 @@ services:
     caddy:
         command: "-agree=true -log stdout -docker-validate-network=false"
         deploy:
+            resources:
+                limits:
+                    cpus: '0.1'
+                    memory: 200M
             mode: global
             labels:
                 - com.ouroboros.enable=true
@@ -75,7 +79,7 @@ services:
         deploy:
             placement:
                 constraints:
-                    - node.hostname == awslinuxdocker
+                    - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
     # php:

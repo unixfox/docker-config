@@ -1,5 +1,34 @@
 version: "3.7"
 services:
+    db:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == azurewinluxdocker
+            restart_policy:
+                condition: any
+        secrets:
+            - NEXTCLOUD_DB_PASSWORD
+        environment:
+            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+            MYSQL_DATABASE: nextcloud
+            MYSQL_USER: nextcloud
+            MYSQL_PASSWORD_FILE: /run/secrets/NEXTCLOUD_DB_PASSWORD
+        image: mariadb
+        healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        networks:
+            - default
+            - bridge
+        volumes:
+            - '/data/nextcloud/mariadb:/var/lib/mysql'
+            - '/etc/localtime:/etc/localtime:ro'
     nextcloud:
         deploy:
             labels:
@@ -16,6 +45,7 @@ services:
         image: "benyanke/nextcloud"
         networks:
             - global
+            - default
         environment:
             TZ: Europe/Brussels
             DOMAIN: nextcloud.unixfox.eu
@@ -26,6 +56,12 @@ services:
             - '/data/nextcloud/apps:/apps2'
             - '/data/nextcloud/themes:/themes'
             - '/etc/localtime:/etc/localtime:ro'
+secrets:
+    NEXTCLOUD_DB_PASSWORD:
+        external: true
 networks:
+    default:
     global:
+        external: true
+    bridge:
         external: true
