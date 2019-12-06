@@ -20,12 +20,11 @@ services:
             start_period: 10s
         networks:
             - bridge
-            - global
+            - default
         volumes:
             - '/data/mariadb:/var/lib/mysql'
             - '/etc/localtime:/etc/localtime:ro'
 networks:
-    global:
-        external: true
+    default:
     bridge:
         external: true

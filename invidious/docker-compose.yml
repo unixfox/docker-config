@@ -18,7 +18,7 @@ services:
         image: postgres:alpine
         networks:
             - bridge
-            - global
+            - default
         volumes:
             - '/data/invidious/postgres:/var/lib/postgresql/data'
             - '/etc/localtime:/etc/localtime:ro'
@@ -71,13 +71,12 @@ services:
             start_period: 1s
         image: flourgaz/invidious
         networks:
-            - global
+            - default
             - bridge
         volumes:
             - '/etc/localtime:/etc/localtime:ro'
             - '/data/invidious/config.yml:/invidious/config/config.yml:ro'
 networks:
-    global:
-        external: true
+    default:
     bridge:
         external: true

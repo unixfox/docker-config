@@ -54,7 +54,6 @@ services:
             - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
         networks:
             - default
-            - global
             - bridge
         deploy:
             placement:
@@ -95,7 +94,6 @@ services:
             - MAILU_DB_PASSWORD
         networks:
             - default
-            - global
         volumes:
             - "/data/mailu/data:/data"
             - "/data/mailu/dkim:/dkim"
@@ -218,8 +216,6 @@ secrets:
         external: true
 
 networks:
-    global:
-        external: true
     default:
         external:
             name: mail_default

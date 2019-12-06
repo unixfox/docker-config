@@ -28,7 +28,7 @@ services:
               target: 58846
         image: "linuxserver/deluge"
         networks:
-            - global
+            - default
             - bridge
         environment:
             - 'TZ=Europe/Brussels'
@@ -55,7 +55,7 @@ services:
                 condition: any
         image: "filebrowser/filebrowser"
         networks:
-            - global
+            - default
         volumes:
             - '/data/deluge/filebrowser.db:/database.db'
             - '/data/deluge/downloads:/srv'
@@ -63,7 +63,6 @@ services:
             - '/etc/localtime:/etc/localtime:ro'
 
 networks:
-    global:
-        external: true
+    default:
     bridge:
         external: true

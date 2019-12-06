@@ -3,6 +3,9 @@ services:
     caddy:
         command: "-agree=true -log stdout -docker-validate-network=false"
         deploy:
+            placement:
+                constraints:
+                    - node.labels.cloud!=aws
             resources:
                 limits:
                     cpus: '0.1'
@@ -27,6 +30,8 @@ services:
             - global
             - bridge
             - socket
+            - invidious
+            - torrent
         secrets:
             - CODING_GITHUB_CLIENT_SECRET
             - PD_API_KEY
@@ -104,6 +109,21 @@ secrets:
         external: true
 
 networks:
+    searx:
+        external:
+            name: searx_default
+    cloud:
+        external:
+            name: cloud_default
+    mail:
+        external:
+            name: mail_default
+    invidious:
+        external:
+            name: invidious_default
+    torrent:
+        external:
+            name: torrent_default
     socket:
         external: true
     global:

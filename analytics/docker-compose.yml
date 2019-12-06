@@ -35,10 +35,11 @@ services:
         volumes:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
         networks:
-            - global
+            - database
 networks:
-    global:
-        external: true
+    database:
+        external:
+            name: database_default
 secrets:
     fathomdbpasswd:
         external: true

@@ -24,7 +24,8 @@ services:
         hostname: powerdns
         image: psitrax/powerdns
         networks:
-            - global
+            - default
+            - database
             - bridge
         ports:
             -
@@ -81,7 +82,8 @@ services:
             - ENTRYPOINT=/usr/local/bin/entrypoint.sh
         image: ngoduykhanh/powerdns-admin
         networks:
-            - global
+            - default
+            - database
         secrets:
             - PDA_SECRET_KEY
             - PDA_SALT
@@ -95,8 +97,10 @@ services:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
             - '/etc/localtime:/etc/localtime:ro'
 networks:
-    global:
-        external: true
+    default:
+    database:
+        external:
+            name: database_default
     bridge:
         external: true
 secrets:

@@ -44,7 +44,6 @@ services:
                 condition: any
         image: "benyanke/nextcloud"
         networks:
-            - global
             - default
         environment:
             TZ: Europe/Brussels
@@ -61,7 +60,5 @@ secrets:
         external: true
 networks:
     default:
-    global:
-        external: true
     bridge:
         external: true
