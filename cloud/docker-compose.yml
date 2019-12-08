@@ -45,6 +45,7 @@ services:
         image: "benyanke/nextcloud"
         networks:
             - default
+            - proxy_global
         environment:
             TZ: Europe/Brussels
             DOMAIN: nextcloud.unixfox.eu
@@ -59,6 +60,8 @@ secrets:
     NEXTCLOUD_DB_PASSWORD:
         external: true
 networks:
+    proxy_global:
+        external: true
     default:
     bridge:
         external: true

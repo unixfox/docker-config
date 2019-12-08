@@ -27,10 +27,11 @@ services:
             - CODING_GITHUB_CLIENT_SECRET=DOCKER-SECRET->CODING_GITHUB_CLIENT_SECRET
             - ENTRYPOINT=/bin/caddy
         networks:
-            - global
+            - proxy_global
             - bridge
             - socket
-            - invidious
+            - default
+            - proxy_aws
             - torrent
         secrets:
             - CODING_GITHUB_CLIENT_SECRET
@@ -78,7 +79,7 @@ services:
     redis:
         image: redis:alpine
         networks:
-            - global
+            - default
         volumes:
             - "/data/redis:/data"
         deploy:
@@ -109,24 +110,15 @@ secrets:
         external: true
 
 networks:
-    searx:
-        external:
-            name: searx_default
-    cloud:
-        external:
-            name: cloud_default
-    mail:
-        external:
-            name: mail_default
-    invidious:
-        external:
-            name: invidious_default
+    proxy_global:
+        name: proxy_global
+    proxy_aws:
+        external: true
     torrent:
-        external:
-            name: torrent_default
+        external: true
+        name: torrent_default
     socket:
         external: true
-    global:
-        external: true
+    default:
     bridge:
         external: true

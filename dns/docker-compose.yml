@@ -26,6 +26,7 @@ services:
         networks:
             - default
             - database
+            - proxy_aws
             - bridge
         ports:
             -
@@ -46,10 +47,10 @@ services:
             - '/data/powerdns:/etc/pdns/conf.d:ro'
             - '/etc/localtime:/etc/localtime:ro'
     powerdns-admin:
-        command: "gunicorn app:app"
+        command: "gunicorn powerdnsadmin\\:create_app\\(\\)"
         deploy:
             labels:
-                - caddy.address=dns.unixfox.eu
+                - caddy.address=admin.dns.unixfox.eu dns.unixfox.eu
                 - caddy.targetport=80
                 - caddy.proxy.transparent
                 - 'caddy.log=/ /var/log/powerdnsadmin.log {combined}'
@@ -84,6 +85,7 @@ services:
         networks:
             - default
             - database
+            - proxy_aws
         secrets:
             - PDA_SECRET_KEY
             - PDA_SALT
@@ -97,10 +99,12 @@ services:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
             - '/etc/localtime:/etc/localtime:ro'
 networks:
+    proxy_aws:
+        external: true
     default:
     database:
-        external:
-            name: database_default
+        external: true
+        name: database_default
     bridge:
         external: true
 secrets:

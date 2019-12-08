@@ -36,10 +36,13 @@ services:
             - '/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro'
         networks:
             - database
+            - proxy_aws
 networks:
+    proxy_aws:
+        external: true
     database:
-        external:
-            name: database_default
+        external: true
+        name: database_default
 secrets:
     fathomdbpasswd:
         external: true

@@ -55,6 +55,7 @@ services:
         networks:
             - default
             - bridge
+            - proxy_global
         deploy:
             placement:
                 constraints:
@@ -216,6 +217,8 @@ secrets:
         external: true
 
 networks:
+    proxy_global:
+        external: true
     default:
         external:
             name: mail_default

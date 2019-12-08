@@ -30,10 +30,10 @@ services:
             retries: 3
             start_period: 10s
         networks:
-            - global
+            - proxy_aws
         volumes:
             - '/data/vscode:/home/coder/project'
             - '/data/vscodeshare:/home/coder/.local/share/code-server'
 networks:
-    global:
+    proxy_aws:
         external: true

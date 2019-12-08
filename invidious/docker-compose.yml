@@ -73,10 +73,13 @@ services:
         networks:
             - default
             - bridge
+            - proxy_global
         volumes:
             - '/etc/localtime:/etc/localtime:ro'
             - '/data/invidious/config.yml:/invidious/config/config.yml:ro'
 networks:
+    proxy_global:
+        external: true
     default:
     bridge:
         external: true

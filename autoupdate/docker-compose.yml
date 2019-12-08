@@ -30,7 +30,7 @@ services:
             restart_policy:
                 condition: any
         environment:
-            - SLEEP_TIME=6h
+            - SLEEP_TIME=30m
             - BLACKLIST_SERVICES="autoupdate_prune"
             - FILTER_SERVICES=label=com.ouroboros.enable=true
         image: mazzolino/shepherd

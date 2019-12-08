@@ -55,7 +55,8 @@ services:
                 condition: any
         image: unixfox/antibot-proxy
         networks:
-            - global
+            - proxy_global
+            - default
         volumes:
             - '/data/caddy/searx/jail:/jail'
             - '/etc/localtime:/etc/localtime:ro'
@@ -95,6 +96,8 @@ services:
             - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
 networks:
     default:
+    proxy_global:
+        external: true
     global:
         external: true
     bridge:

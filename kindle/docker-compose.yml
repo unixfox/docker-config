@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+    rss:
+        image: unixfox/kindleear
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+                - caddy.address=kindle.unixfox.eu
+                - caddy.targetport=8080
+                - caddy.proxy.transparent
+                - caddy.tls.dns=powerdns
+            placement:
+                constraints:
+                    - node.hostname == azurelinuxdocker
+            restart_policy:
+                condition: any
+        ports:
+            - mode: host
+              protocol: tcp
+              published: 8000
+              target: 8000
+        healthcheck:
+            test: "curl --fail http://localhost:8080/ || exit 1"
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        networks:
+            - proxy_global
+        volumes:
+            - '/data/kindleear:/datastore'
+            - '/data/kindleear/config.py:/app/config.py'
+networks:
+    proxy_global:
+        external: true
