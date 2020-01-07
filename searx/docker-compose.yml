@@ -53,7 +53,7 @@ services:
                     - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
-        image: unixfox/antibot-proxy
+        image: quay.io/unixfox/antibot-proxy
         networks:
             - proxy_global
             - default
