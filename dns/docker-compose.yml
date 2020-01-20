@@ -50,7 +50,7 @@ services:
         command: "gunicorn powerdnsadmin\\:create_app\\(\\)"
         deploy:
             labels:
-                - caddy.address=admin.dns.unixfox.eu dns.unixfox.eu
+                - caddy.address=admin.dns.unixfox.eu
                 - caddy.targetport=80
                 - caddy.proxy.transparent
                 - 'caddy.log=/ /var/log/powerdnsadmin.log {combined}'
@@ -80,7 +80,7 @@ services:
             - SQLALCHEMY_DATABASE_URI=DOCKER-SECRET->PDA_SQLALCHEMY_DATABASE_URI
             - PDNS_HOST=powerdns
             - PDNS_API_KEY=DOCKER-SECRET->PD_API_KEY
-            - ENTRYPOINT=/usr/local/bin/entrypoint.sh
+            - ENTRYPOINT=/usr/bin/entrypoint.sh
         image: ngoduykhanh/powerdns-admin
         networks:
             - default

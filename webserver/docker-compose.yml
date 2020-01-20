@@ -55,9 +55,10 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
             - "/data/env_secrets_expand.sh:/env_secrets_expand.sh:ro"
     socket:
-        image: tecnativa/docker-socket-proxy
+        image: alpine/socat
         networks:
             - socket
+        command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
         deploy:
             labels:
                 - com.ouroboros.enable=true
@@ -68,14 +69,6 @@ services:
                 condition: any
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-            CONTAINERS: 1
-            SERVICES: 1
-            NETWORKS: 1
-            CONFIGS: 1
-            TASKS: 1
-            NODES: 1
-            INFO: 1
     redis:
         image: redis:alpine
         networks:
