@@ -1,37 +1,22 @@
-version: '3.7'
+version: "3.7"
 services:
-    antibot:
+    filtron:
         deploy:
             labels:
-                - 'caddy.address=searx.be www.searx.be'
-                - caddy.targetport=3000
+                - "caddy.address=searx.be www.searx.be"
+                - caddy.targetport=4004
                 - caddy.proxy.transparent
                 - 'caddy.log_0=/ /var/log/searx.log "{combined} - {latency}"'
                 - 'caddy.log_1=/ /var/log/searx_fail2ban.log "{when_unix} {remote} {status}"'
-                - 'caddy.errors=/var/log/searx_errors.log'
-                - 'caddy.status=403 /deny'
+                - "caddy.errors=/var/log/searx_errors.log"
+                - "caddy.status=403 /deny"
                 - caddy.proxy.header_downstream=-server
                 - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data:; script-src ''self'' ''nonce-upaek0pieKu'' privacystats.searx.be; img-src * data:; object-src ''none''; style-src ''self'' ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
-                - 'caddy.proxy.header_downstream_1=X-Content-Type-Options nosniff'
-                - 'caddy.proxy.header_downstream_2=X-Frame-Options DENY'
+                - "caddy.proxy.header_downstream_1=X-Content-Type-Options nosniff"
+                - "caddy.proxy.header_downstream_2=X-Frame-Options DENY"
                 - 'caddy.proxy.header_downstream_3=X-XSS-Protection "1; mode=block"'
                 - 'caddy.proxy.header_downstream_4=referrer-policy "no-referrer, strict-origin-when-cross-origin"'
                 - 'caddy.proxy.header_downstream_5=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
-                - caddy.filter_0=rule
-                - caddy.filter_0.path=/$$
-                - caddy.filter_0.search_pattern=</body>
-                - caddy.filter_0.replacement=@/root/.caddy/searx/fathom.html
-                - caddy.filter_1=rule
-                - caddy.filter_1.path=/
-                - 'caddy.filter_1.search_pattern=type="text/javascript"'
-                - caddy.filter_1.replacement=@/root/.caddy/nounce.html
-                - caddy.filter_2=rule
-                - caddy.filter_2.path=/
-                - caddy.filter_2.search_pattern=<head>
-                - caddy.filter_2.replacement=@/root/.caddy/searx/opengraph.html
-                - caddy.ipfilter=/
-                - caddy.ipfilter.rule=block
-                - caddy.ipfilter.prefix_dir=/root/.caddy/searx/jail
                 - caddy.rewrite_0=/
                 - 'caddy.rewrite_0.if_0={query} has "format=json"'
                 - 'caddy.rewrite_0.if_1={query} has "format=csv"'
@@ -40,60 +25,46 @@ services:
                 - caddy.rewrite_0.to=/deny
                 - caddy.gzip
                 - caddy.expires
-                - 'caddy.expires.match=static/* 1w'
+                - "caddy.expires.match=static/* 1w"
                 - caddy.errors.403=/root/.caddy/errorspage/HTTP403.html
-                - caddy.rewrite_1=/
-                - 'caddy.rewrite_1.if_0={remote} is "2a01:4f8:161:542e::2"'
-                - 'caddy.rewrite_1.if_1={remote} is "5.9.58.49"'
-                - 'caddy.rewrite_1.if_op=or'
-                - caddy.rewrite_1.to=/about
                 - com.ouroboros.enable=true
             placement:
                 constraints:
                     - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
-        image: quay.io/unixfox/antibot-proxy
+        image: dalf/filtron
+        command: -listen 0.0.0.0:4004 -target searx:8888
         networks:
-            - proxy_global
             - default
+            - proxy_global
         volumes:
-            - '/data/caddy/searx/jail:/jail'
-            - '/etc/localtime:/etc/localtime:ro'
-            - '/data/searx/bot.pug:/app/views/bot.pug:ro'
-            - '/data/searx/config.toml:/app/config.toml:ro'
+            - "/data/searx/filtron/rules.json:/etc/filtron/rules.json:rw"
+            - "/etc/localtime:/etc/localtime:ro"
     searx:
         deploy:
+            mode: global
             placement:
                 constraints:
                     - node.labels.cloud!=aws
             labels:
                 - com.ouroboros.enable=true
-            mode: global
             restart_policy:
                 condition: any
-        healthcheck:
-            test: "/usr/bin/wget --quiet --tries=1 --spider http://localhost:8888/?q=searx || exit 1"
-            interval: 5m
-            timeout: 20s
-            retries: 3
-            start_period: 20s
         environment:
-            - 'BASE_URL=https://searx.be'
+            - "BASE_URL=https://searx.be"
             - PGID=0
             - PUID=0
         image: woahbase/alpine-searx
         networks:
             - default
-            - bridge
         volumes:
-            - '/data/searx/settings.yml:/data/settings.yml:ro'
-            - '/etc/hosts:/etc/hosts:ro'
-            - '/etc/localtime:/etc/localtime:ro'
-            - '/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro'
-            - '/data/searx/engines/startpage.py:/usr/local/searx/searx/engines/startpage.py:ro'
-            - '/data/searx/webapp.py:/usr/local/searx/searx/webapp.py:ro'
-            - '/data/searx/templates/oscar/results.html:/usr/local/searx/searx/templates/oscar/results.html:ro'
+            - "/data/searx/settings.yml:/data/settings.yml:ro"
+            - "/etc/hosts:/etc/hosts:ro"
+            - "/etc/localtime:/etc/localtime:ro"
+            #- "/data/searx/engines/startpage.py:/usr/local/searx/searx/engines/startpage.py:ro"
+            #- "/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro"
+
 networks:
     default:
     proxy_global:
