@@ -1,5 +1,33 @@
 version: '3.7'
 services:
+    postgres:
+        deploy:
+            labels:
+                - com.ouroboros.enable=true
+            placement:
+                constraints:
+                    - node.hostname == oraclefree2
+            restart_policy:
+                condition: any
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "postgres"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        secrets:
+            - POSTGRES_PASSWD
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWD
+        ports:
+            - mode: host
+              protocol: tcp
+              published: 5432
+              target: 5432
+        image: postgres:alpine
+        volumes:
+            - '/data/postgres:/var/lib/postgresql/data'
+            - '/etc/localtime:/etc/localtime:ro'
     mariadb:
         deploy:
             labels:
@@ -27,4 +55,8 @@ services:
 networks:
     default:
     bridge:
+        external: true
+
+secrets:
+    POSTGRES_PASSWD:
         external: true
