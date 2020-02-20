@@ -42,7 +42,7 @@ services:
                     - node.hostname == azurewinluxdocker
             restart_policy:
                 condition: any
-        image: "benyanke/nextcloud"
+        image: "quay.io/unixfox/docker-nextcloud"
         networks:
             - default
             - proxy_global
