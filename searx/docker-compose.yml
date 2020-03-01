@@ -34,7 +34,7 @@ services:
             restart_policy:
                 condition: any
         image: dalf/filtron
-        command: -listen 0.0.0.0:4004 -target searx:8888
+        command: -listen 0.0.0.0:4004 -target searx:8080
         networks:
             - default
             - proxy_global
@@ -43,10 +43,9 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
     searx:
         deploy:
-            mode: global
             placement:
                 constraints:
-                    - node.labels.cloud!=aws
+                    - node.hostname == mx.emiliendevos.be
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -55,18 +54,50 @@ services:
             - "BASE_URL=https://searx.be"
             - PGID=0
             - PUID=0
-        image: woahbase/alpine-searx
+        image: searx/searx:latest
         networks:
             - default
+            - proxygoogle
         volumes:
-            - "/data/searx/settings.yml:/data/settings.yml:ro"
-            - "/etc/hosts:/etc/hosts:ro"
+            - "/data/searx/settings.yml:/etc/searx/settings.yml:ro"
             - "/etc/localtime:/etc/localtime:ro"
-            #- "/data/searx/engines/startpage.py:/usr/local/searx/searx/engines/startpage.py:ro"
+            - "/data/searx/poolrequests.py:/usr/local/searx/searx/poolrequests.py:ro"
             #- "/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro"
+            #- "/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro"
+    proxygoogle:
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == awslinuxdocker
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+        secrets:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+        environment:
+            - AWS_REGIONS=eu-central-1
+            - PROXY_LISTENERS=:8080
+            - PROXY_FREQUENCY_REFRESH=5m
+        ports:
+            - mode: host
+              protocol: tcp
+              published: 2222
+              target: 2222
+        image: unixfox/awslambdaproxy
+        networks:
+            - proxygoogle
+
+secrets:
+    AWS_ACCESS_KEY_ID:
+        external: true
+    AWS_SECRET_ACCESS_KEY:
+        external: true
 
 networks:
     default:
+    proxygoogle:
     proxy_global:
         external: true
     global:
