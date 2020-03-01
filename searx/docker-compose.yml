@@ -30,7 +30,7 @@ services:
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.hostname == mx.emiliendevos.be
+                    - node.labels.cloud==oracle
             restart_policy:
                 condition: any
         image: dalf/filtron
@@ -43,9 +43,10 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
     searx:
         deploy:
+            mode: global
             placement:
                 constraints:
-                    - node.hostname == mx.emiliendevos.be
+                    - node.labels.cloud==oracle
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
