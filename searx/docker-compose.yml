@@ -6,35 +6,62 @@ services:
                 - "caddy.address=searx.be www.searx.be"
                 - caddy.targetport=4004
                 - caddy.proxy.transparent
-                - 'caddy.log_0=/ /var/log/searx.log "{combined} - {latency}"'
-                - 'caddy.log_1=/ /var/log/searx_fail2ban.log "{when_unix} {remote} {status}"'
-                - "caddy.errors=/var/log/searx_errors.log"
-                - "caddy.status=403 /deny"
+                - 'caddy.header_0=/'
+                # Enable HTTP Strict Transport Security (HSTS) to force clients to always connect via HTTPS
+                - 'caddy.header_0.Strict-Transport-Security="max-age=31536000; includeSubDomains; preload"'
+                # Enable cross-site filter (XSS) and tell browser to block detected attacks
+                - 'caddy.header_0.X-XSS-Protection="1; mode=block"'
+                # Prevent some browsers from MIME-sniffing a response away from the declared Content-Type
+                - 'caddy.header_0.X-Content-Type-Options="nosniff"'
+                # Disallow the site to be rendered within a frame (clickjacking protection)
+                - 'caddy.header_0.X-Frame-Options="SAMEORIGIN"'
+                # Disable some features
+                - 'caddy.header_0.Feature-Policy="accelerometer ''none'';ambient-light-sensor ''none''; autoplay ''none'';camera ''none'';encrypted-media ''none'';focus-without-user-activation ''none''; geolocation ''none'';gyroscope ''none'';magnetometer ''none'';microphone ''none'';midi ''none'';payment ''none'';picture-in-picture ''none''; speaker ''none'';sync-xhr ''none'';usb ''none'';vr ''none''"'
+                # Cache
+                - 'caddy.header_0.Cache-Control="no-cache, no-store"'
+                - 'caddy.header_0.Pragma="no-cache"'
+                # Referer
+                - 'caddy.header_0.Referrer-Policy="no-referrer"'
+                # X-Robots-Tag
+                - 'caddy.header_0.X-Robots-Tag="noindex, noarchive, nofollow"'
+                # Remove Server header
                 - caddy.proxy.header_downstream=-server
-                - 'caddy.proxy.header_downstream_0=Content-Security-Policy "default-src ''none''; font-src ''self'' data:; script-src ''self''; img-src * data:; object-src ''none''; style-src ''self'' ''unsafe-inline''; frame-src ''self''; connect-src *; form-action ''self''; base-uri ''self'';frame-ancestors ''self'';"'
-                - 'caddy.proxy.header_downstream_1=X-Content-Type-Options nosniff'
-                - 'caddy.proxy.header_downstream_2=X-Frame-Options DENY'
-                - 'caddy.proxy.header_downstream_3=X-XSS-Protection "1; mode=block"'
-                - 'caddy.proxy.header_downstream_4=referrer-policy "strict-origin-when-cross-origin"'
-                - 'caddy.proxy.header_downstream_5=strict-transport-security "max-age=63072000; includeSubDomains; preload"'
+                # CSP
+                - 'caddy.header_0.Content-Security-Policy="upgrade-insecure-requests; default-src ''none''; script-src ''self''; style-src ''self'' ''unsafe-inline''; form-action ''self''; font-src ''self''; frame-ancestors ''self''; base-uri ''self''; connect-src ''self'' https://overpass-api.de; img-src ''self'' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"'
+                - 'caddy.proxy.except=/searx-checker/status.json'
+                - caddy.proxy_1=/morty morty:3000
+                - 'caddy.gzip_1.not=/morty'
+                - 'caddy.header_1=/morty'
+                - 'caddy.header_1.Content-Security-Policy="default-src ''none''; style-src ''self'' ''unsafe-inline''; form-action ''self''; frame-ancestors ''self''; base-uri ''self''; img-src ''self'' data:; font-src ''self''; frame-src ''self''"'
+                #- 'caddy.header_1=-Server'
                 - caddy.rewrite_0=/
                 - 'caddy.rewrite_0.if_0={query} has "format=json"'
                 - 'caddy.rewrite_0.if_1={query} has "format=csv"'
                 - 'caddy.rewrite_0.if_2={query} has "format=rss"'
                 - caddy.rewrite_0.if_op=or
                 - caddy.rewrite_0.to=/deny
-                - caddy.gzip
+                - caddy.gzip_0
                 - caddy.expires
                 - "caddy.expires.match=static/* 1w"
-                - caddy.errors.403=/root/.caddy/errorspage/HTTP403.html
+                - 'caddy.limits=10KB'
+                - 'caddy.header_2=/config'
+                - 'caddy.header_2.Access-Control-Allow-Methods="GET, OPTIONS"'
+                - 'caddy.header_2.Access-Control-Allow-Origin="*"'
+                - 'caddy.header_3=/status'
+                - 'caddy.header_3.Access-Control-Allow-Methods="GET, OPTIONS"'
+                - 'caddy.header_3.Access-Control-Allow-Origin="*"'
+                - 'caddy.root=/root/.caddy'
+                - 'caddy.rewrite_1=/'
+                - 'caddy.rewrite_1.regexp=^/status$$'
+                - 'caddy.rewrite_1.to=/searx-checker/status.json'
                 - com.ouroboros.enable=true
             placement:
                 constraints:
-                    - node.labels.cloud==oracle
+                    - node.hostname == mx.emiliendevos.be
             restart_policy:
                 condition: any
         image: dalf/filtron
-        command: -listen 0.0.0.0:4004 -target searx:8080
+        command: -listen 0.0.0.0:4004 -target searx:8888
         networks:
             - default
             - proxy_global
@@ -43,7 +70,7 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
     searx:
         deploy:
-            mode: global
+            replicas: 8
             placement:
                 constraints:
                     - node.labels.cloud==oracle
@@ -55,40 +82,92 @@ services:
             - "BASE_URL=https://searx.be"
             - PGID=0
             - PUID=0
-        image: searx/searx:latest
+        image: woahbase/alpine-searx
         networks:
             - default
-            - proxygoogle
         volumes:
-            - "/data/searx/settings.yml:/etc/searx/settings.yml:ro"
+            - "/data/searx/settings.yml:/data/settings.yml:ro"
             - "/etc/localtime:/etc/localtime:ro"
-            - "/data/searx/poolrequests.py:/usr/local/searx/searx/poolrequests.py:ro"
-            #- "/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro"
-            #- "/data/searx/engines/google.py:/usr/local/searx/searx/engines/google.py:ro"
-    proxygoogle:
+            #- "/data/searx/poolrequests.py:/usr/local/searx/searx/poolrequests.py:ro"
+            - "/data/searx/engines/googlenow.py:/usr/local/searx/searx/engines/google.py:ro"
+        logging:
+            driver: none
+    morty:
         deploy:
+            replicas: 2
             placement:
                 constraints:
-                    - node.hostname == awslinuxdocker
+                    - node.labels.cloud==oracle
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
                 condition: any
-        secrets:
-            - AWS_ACCESS_KEY_ID
-            - AWS_SECRET_ACCESS_KEY
+        command: -listen 0.0.0.0:3000 -timeout 6 -ipv6
         environment:
-            - AWS_REGIONS=eu-central-1
-            - PROXY_LISTENERS=:8080
-            - PROXY_FREQUENCY_REFRESH=5m
-        ports:
-            - mode: host
-              protocol: tcp
-              published: 2222
-              target: 2222
-        image: unixfox/awslambdaproxy
+            - MORTY_KEY=gRb4075+gVd4KKrqcdXuJhlVS1p72hcrtKiVtpeeSSWu
+        image: dalf/morty
         networks:
-            - proxygoogle
+            - default
+            - bridge
+            - proxy_global
+        logging:
+            driver: none
+    searx-checker:
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == mx.emiliendevos.be
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+        command: -cron -o html/data/status.json http://searx:8888
+        volumes:
+            - "/data/caddy/searx/searx-checker:/usr/local/searx-checker/html/data:rw"
+        image: searx/searx-checker
+        networks:
+            - default
+    # proxy:
+    #     deploy:
+    #         placement:
+    #             constraints:
+    #                 - node.hostname == oraclefree1
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         restart_policy:
+    #             condition: any
+    #     volumes:
+    #         - /data/searx/tinyproxy.conf:/etc/tinyproxy/tinyproxy.conf
+    #     image: vimagick/tinyproxy
+    #     networks:
+    #         - default
+    #         - proxygoogle
+    # proxygoogle:
+    #     deploy:
+    #         placement:
+    #             constraints:
+    #                 - node.hostname == awslinuxdocker
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         restart_policy:
+    #             condition: any
+    #     secrets:
+    #         - AWS_ACCESS_KEY_ID
+    #         - AWS_SECRET_ACCESS_KEY
+    #     environment:
+    #         - AWS_REGIONS=eu-central-1
+    #         - PROXY_LISTENERS=:8080
+    #         - PROXY_FREQUENCY_REFRESH=5m
+    #     ports:
+    #         - mode: host
+    #           protocol: tcp
+    #           published: 2222
+    #           target: 2222
+    #     image: unixfox/awslambdaproxy
+    #     networks:
+    #         - proxygoogle
+    #     logging:
+    #         driver: none
 
 secrets:
     AWS_ACCESS_KEY_ID:
