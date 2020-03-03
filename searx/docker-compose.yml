@@ -92,6 +92,21 @@ services:
             - "/data/searx/engines/googleproxy.py:/usr/local/searx/searx/engines/google.py:ro"
         logging:
             driver: none
+    proxyrot:
+        deploy:
+            replicas: 2
+            placement:
+                constraints:
+                    - node.labels.cloud==oracle
+            labels:
+                - com.ouroboros.enable=true
+            restart_policy:
+                condition: any
+        image: productionwentdown/caddy
+        volumes:
+            - '/data/searx/proxyrot.Caddyfile:/etc/Caddyfile:ro'
+        networks:
+            - default
     morty:
         deploy:
             replicas: 2
