@@ -89,7 +89,7 @@ services:
             - "/data/searx/settings.yml:/data/settings.yml:ro"
             - "/etc/localtime:/etc/localtime:ro"
             #- "/data/searx/poolrequests.py:/usr/local/searx/searx/poolrequests.py:ro"
-            - "/data/searx/engines/googlenow.py:/usr/local/searx/searx/engines/google.py:ro"
+            - "/data/searx/engines/googleproxy.py:/usr/local/searx/searx/engines/google.py:ro"
         logging:
             driver: none
     morty:
