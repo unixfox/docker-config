@@ -50,7 +50,7 @@ services:
                 - 'caddy.header_3=/status'
                 - 'caddy.header_3.Access-Control-Allow-Methods="GET, OPTIONS"'
                 - 'caddy.header_3.Access-Control-Allow-Origin="*"'
-                - 'caddy.root=/root/.caddy'
+                - 'caddy.root=/root/.caddy/searx'
                 - 'caddy.rewrite_1=/'
                 - 'caddy.rewrite_1.regexp=^/status$$'
                 - 'caddy.rewrite_1.to=/searx-checker/status.json'
