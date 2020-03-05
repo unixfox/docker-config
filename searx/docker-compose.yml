@@ -70,10 +70,10 @@ services:
             - "/etc/localtime:/etc/localtime:ro"
     searx:
         deploy:
-            replicas: 8
+            replicas: 4
             placement:
                 constraints:
-                    - node.labels.cloud==oracle
+                    - node.hostname == oraclefree2
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -94,10 +94,9 @@ services:
             driver: none
     proxyrot:
         deploy:
-            replicas: 2
             placement:
                 constraints:
-                    - node.labels.cloud==oracle
+                    - node.hostname == oraclefree2
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -112,7 +111,7 @@ services:
             replicas: 2
             placement:
                 constraints:
-                    - node.labels.cloud==oracle
+                    - node.hostname == oraclefree1
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -131,7 +130,7 @@ services:
         deploy:
             placement:
                 constraints:
-                    - node.hostname == mx.emiliendevos.be
+                    - node.hostname == azurelinuxdocker
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
