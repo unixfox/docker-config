@@ -73,7 +73,7 @@ services:
             replicas: 4
             placement:
                 constraints:
-                    - node.hostname == oraclefree2
+                    - node.labels.cloud==oracle
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -82,36 +82,37 @@ services:
             - "BASE_URL=https://searx.be"
             - PGID=0
             - PUID=0
-        image: woahbase/alpine-searx
+        image: unixfox/searx-custom
         networks:
             - default
         volumes:
             - "/data/searx/settings.yml:/data/settings.yml:ro"
             - "/etc/localtime:/etc/localtime:ro"
-            #- "/data/searx/poolrequests.py:/usr/local/searx/searx/poolrequests.py:ro"
-            - "/data/searx/engines/googleproxy.py:/usr/local/searx/searx/engines/google.py:ro"
+            - "/data/searx/poolrequests_proxy.py:/usr/local/searx/searx/poolrequests.py:ro"
+            - "/data/searx/engines/google_proxy.py:/usr/local/searx/searx/engines/google.py:ro"
+            - "/data/searx/engines/torrentz.py:/usr/local/searx/searx/engines/torrentz.py:ro"
         logging:
             driver: none
-    proxyrot:
-        deploy:
-            placement:
-                constraints:
-                    - node.hostname == oraclefree2
-            labels:
-                - com.ouroboros.enable=true
-            restart_policy:
-                condition: any
-        image: productionwentdown/caddy
-        volumes:
-            - '/data/searx/proxyrot.Caddyfile:/etc/Caddyfile:ro'
-        networks:
-            - default
+    # proxyrot:
+    #     deploy:
+    #         placement:
+    #             constraints:
+    #                 - node.hostname == oraclefree2
+    #         labels:
+    #             - com.ouroboros.enable=true
+    #         restart_policy:
+    #             condition: any
+    #     image: productionwentdown/caddy
+    #     volumes:
+    #         - '/data/searx/proxyrot.Caddyfile:/etc/Caddyfile:ro'
+    #     networks:
+    #         - default
     morty:
         deploy:
-            replicas: 2
+            mode: global
             placement:
                 constraints:
-                    - node.hostname == oraclefree1
+                    - node.labels.cloud==oracle
             labels:
                 - com.ouroboros.enable=true
             restart_policy:
@@ -191,7 +192,6 @@ secrets:
 
 networks:
     default:
-    proxygoogle:
     proxy_global:
         external: true
     global:
